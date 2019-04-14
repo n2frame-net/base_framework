@@ -1,0 +1,205 @@
+
+<!--=======================================================================================================================================
+===================================================== BEGIN : SCRIPT JAVASCRIPT ==========================================================
+========================================================================================================================================-->
+<script type="text/javascript">
+
+
+
+//==================================================================================================================//
+//========================================== BEGIN : DEKLARASI VARIABLE GLOBAL =====================================//
+var NN = new NNFrameWork();
+var watermark = "NPL";
+
+// DISESUIKAN DENGAN JUMLAH PARAMETER YANG AKAN DITAMPUNG PADA PARAMETER STORE PROCEDURE
+// JUMLAH MAXIMAL BERADA PADA SERVICEGATEWAY $max_param
+// AKAN TERJADI ERROR APABILA JUMLAH YANG DI ISI DISINI TIDAK SESUAI JUMLAH PENAMPUNG DI SP
+var max_param_sp = 10;
+
+var dataMenuBar;
+//======================================= END : DEKLARASI VARIABLE GLOBAL ==========================================//
+//==================================================================================================================//
+
+
+
+function renderMenuSidebar(returnData) {
+    var obj = JSON.parse(returnData);
+
+    var rownumber = 0;
+    var sidebarMain = "";
+
+    var cur_menu = "";
+
+    var i = 1;
+    var p = obj.data;
+		// apabila balikan data kosong maka masuk if ini
+		if(p[rownumber] == undefined){
+        document.getElementById("rendermenusiderbar").innerHTML = sidebarMain;
+			return;
+		}
+    var totalfield = Object.keys(p[rownumber]).length;
+
+    dataMenuBar = new Array();
+    for (var key in p) {
+      if (p.hasOwnProperty(key)) {
+
+            // deklarasi array dua dimensi
+            dataMenuBar.push(new Array())
+
+            // looping field sebanyak balikan dari controller
+            for(l=1; l<=totalfield; l++){
+                dataMenuBar[rownumber][l] = p[key]['N'+l];
+            }
+
+            if (cur_menu != dataMenuBar[rownumber][1]) {
+                if (cur_menu != "") {
+                    sidebarMain += "</ul></li>";
+                }
+
+                // JIKA LEVEL 1 DAN ADA FILE MAKA MASUK IF
+                if(dataMenuBar[rownumber][3] != 1){
+                  sidebarMain += '<li class="">';
+                }else{
+                  // JIKA LEVEL 1 DAN TIDAK ADA FILE MAKA MASUK ELSE
+                  sidebarMain += '<li class="treeview">';
+                }
+
+
+                if(dataMenuBar[rownumber][3] == 1){
+                    sidebarMain += '<a href="#">';
+                    sidebarMain += '<i class="fa fa-th"></i> <span>'+dataMenuBar[rownumber][4]+'</span>';
+                    sidebarMain += '<span class="pull-right-container">';
+                    sidebarMain += '<i class="fa fa-angle-left pull-right"></i>';
+                    sidebarMain += '</span>';
+                    sidebarMain += '</a>';
+                }else{
+                    // sidebarMain += '<a href="/'+dataMenuBar[rownumber][11]+'">'; // pakai ini ketika di server
+                    sidebarMain += '<a href="?n='+dataMenuBar[rownumber][11]+'">'; // pakai ini ketika di local
+
+                    if(dataMenuBar[rownumber][6] == 1){
+                      sidebarMain += '<i class="fa fa-th"></i> <span>'+dataMenuBar[rownumber][4]+'</span>';
+                    }else{
+                      sidebarMain += '<i class="fa fa-circle-o"></i> <span>'+dataMenuBar[rownumber][5]+'</span>';
+                    }
+
+                    sidebarMain += '<span class="pull-right-container">';
+
+                    // JIKA LEVEL 1 DAN ADA FILE MAKA MASUK IF
+                    if(dataMenuBar[rownumber][3] != 1){
+                      sidebarMain += '';
+                    }else{
+                    // JIKA LEVEL 1 DAN TIDAK ADA FILE MAKA MASUK ELSE
+                      sidebarMain += '<i class="fa fa-angle-left pull-right"></i>';
+                    }
+
+                    sidebarMain += '</span>';
+                    sidebarMain += '</a>';
+                }
+
+                sidebarMain += '<ul class="treeview-menu">';
+
+                cur_menu = dataMenuBar[rownumber][1];
+            }
+            else {
+                sidebarMain += '<li>';
+                // sidebarMain += '<a href="/'+dataMenuBar[rownumber][11]+'">'; // pakai ini ketika di server
+                sidebarMain += '<a href="?n='+dataMenuBar[rownumber][11]+'">'; // pakai ini ketika di localhost
+
+                sidebarMain += '<i class="fa fa-circle-o"></i> <span>'+dataMenuBar[rownumber][5]+'</span>';
+
+                sidebarMain += '</a>';
+                sidebarMain += '</li>';
+            }
+            cur_menu = dataMenuBar[rownumber][1];
+            rownumber++;
+        }
+    }
+
+    //  <li><a href="logout.php">LOGOUT</a></li>
+    // $menu .= "<li><a href='logout.php'>LOGOUT</a></li>";
+    // $menu .= "</ul></li>";
+    // echo "$menu";
+    document.getElementById('rendermenusiderbar').innerHTML = sidebarMain;
+    // $('#rendermenusiderbar').append(sidebarMain);
+
+    // UNTUK MEMBUAT ACTIVED PADA MENU
+    pageUrl = '?'+(document.URL.split('?')[1] == undefined ? '' : document.URL.split('?')[1].replace('#',''));
+    // pageUrl = (document.URL.split('.net')[1] == undefined ? '' : document.URL.split('.net')[1].replace('#',''));
+    pageUrl = pageUrl.replace("pleasewait", "");
+    $('ul li.active').removeClass("active");
+    if (pageUrl != '?') {
+        $('ul a[href^="' + pageUrl + '"]').parent('li').addClass('active');
+        $('ul a[href^="' + pageUrl + '"]').parent('li').parent('ul').parent('li').addClass('active');
+    }
+}
+
+
+function selectDataSidebar(e){
+    var value = (e == undefined ? '-9' : e.target.value);
+    // PERSIAPAN PENGIRIMAN
+    controller = '2663da4add7faeda9d690079bd6167ff';
+    // alert(controller);
+    whattodo = 's801cda9c0408e05b4c359ae69ad22758_menubar';
+
+	   NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+    // SETTING KIRIMAN
+    kiriman[1] = value;
+
+    // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+    NN.callService(kiriman);
+    // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+    // JIKA TIDAK MAKA AKAN TERJADI ERROR
+    renderMenuSidebar(NN.backService(watermark));
+
+    controller = urlparamsplit[0];
+}
+
+
+</script>
+<!--=======================================================================================================================================
+===================================================== END : SCRIPT JAVASCRIPT ==========================================================
+========================================================================================================================================-->
+
+
+
+
+
+
+<!-- Left side column. contains the logo and sidebar -->
+<aside class="main-sidebar">
+  <!-- sidebar: style can be found in sidebar.less -->
+  <section class="sidebar">
+    <!-- Sidebar user panel -->
+    <div class="user-panel">
+      <div class="pull-left image">
+        <img src="" class="img-circle session_image" alt="">
+      </div>
+      <div class="pull-left info">
+        <p class="session_fullname"></p>
+        <!-- <a href="#"><i class="fa fa-circle text-success"></i> Online</a> -->
+      </div>
+    </div>
+    <!-- search form -->
+    <div class="sidebar-form">
+      <div class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Search..." onkeyup="selectDataSidebar(event);">
+        <span class="input-group-btn">
+              <button type="button" name="search" id="search-btn" class="btn btn-flat">
+                <i class="fa fa-search"></i>
+              </button>
+            </span>
+      </div>
+    </div>
+    <!-- /.search form -->
+    <!-- sidebar menu: : style can be found in sidebar.less -->
+    <ul class="sidebar-menu" data-widget="tree" data-api="tree" data-accordion=0 id="rendermenusiderbar">
+      <!-- MENU AKAN DI RENDER -->
+    </ul>
+  </section>
+  <!-- /.sidebar -->
+</aside>
+
+<script>
+	selectDataSidebar();
+</script>

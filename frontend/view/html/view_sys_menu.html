@@ -1,0 +1,1035 @@
+<!--
+    ==================================== BEGIN: INFO FILES ======================================
+    VIEW       : view_sys_menu.html
+    CONTROLLER : controller_sys_menu.nfh.php
+    SP	       : sp_sys_menu
+    MODEL      : NNclass.php
+    ==================================== END: INFO FILES ========================================
+ -->
+
+
+<!-- ===================================================================================================================================
+===================================================== BEGIN : SCRIPT JAVASCRIPT ========================================================
+==================================================================================================================================== -->
+<script type="text/javascript">
+
+//==================================================================================================================//
+//========================================== BEGIN : DEKLARASI VARIABLE GLOBAL =====================================//
+
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX BEGIN : JANGAN DI UBAH ! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+watermark = 'NPL'; // JIKA DI UBAH AKAN ADA ERROR
+controller = urlparamsplit[0];
+namesp = urlparamsplit[1];
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX END : JANGAN DI UBAH ! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// DISESUIKAN DENGAN JUMLAH PARAMETER YANG AKAN DITAMPUNG PADA PARAMETER STORE PROCEDURE
+// JUMLAH MAXIMAL BERADA PADA SERVICEGATEWAY $max_param
+// AKAN TERJADI ERROR APABILA JUMLAH YANG DI ISI DISINI TIDAK SESUAI JUMLAH PENAMPUNG DI SP
+var max_param_sp = 10;
+
+
+// UNTUK RENDER DATA ARRAY
+// DIPASTIKAN KETIKA BUAT SELECT BARU, MAKA INI HARUS DITAMBAH
+// KARENA SUPAYA TIDAK TERTIMPA DATA ARRAY NYA
+var dataMain;
+var dataSelectMenu;
+var dataSelectFile;
+
+// UNTUK VARIABLE DATATABEL
+var dataTables;
+//======================================= END : DEKLARASI VARIABLE GLOBAL ==========================================//
+//==================================================================================================================//
+
+
+//===================================================================================================================
+//======================================= BEGIN : RENDER TABLE ======================================================
+//===================================================================================================================
+
+function renderTable(returnData) {
+
+    // CLEAR TABLE RENDER
+	  dataTables.clear().draw();
+
+    var obj = JSON.parse(returnData);
+
+    var rownumber = 0;
+    var tableMain = "";
+    var i = 1;
+    var p = obj.data;
+		// apabila balikan data kosong maka masuk if ini
+		if(p[rownumber] == undefined){
+			dataTables.rows.add($(tableMain)).draw();
+			return;
+		}
+    var totalfield = Object.keys(p[rownumber]).length;
+
+    dataMain = new Array();
+    for (var key in p) {
+      if (p.hasOwnProperty(key)) {
+
+            // deklarasi array dua dimensi
+            dataMain.push(new Array())
+
+            // looping field sebanyak balikan dari controller
+            for(l=1; l<=totalfield; l++){
+                dataMain[rownumber][l] = p[key]['N'+l];
+            }
+
+						tableMain += "<tr id = \"" + "RowMain" + i + "\"" + ">";
+
+						tableMain += "<td class='text-center'>"+(i++)+"</td>";
+
+						if(dataMain[rownumber][6] == 1){
+								tableMain += "<td>"+dataMain[rownumber][4]+"</td>";
+						}else{
+								tableMain += "<td> --> "+dataMain[rownumber][5]+"</td>";
+						}
+						tableMain += "<td>"+(dataMain[rownumber][6] == 1 ? 'MENU' : 'SUBMENU')+"</td>";
+						tableMain += "<td>"+dataMain[rownumber][7]+"</td>";
+						tableMain += "<td>"+dataMain[rownumber][8]+"</td>";
+
+						if(dataMain[rownumber][6] == 1){
+								tableMain += "<td>"+dataMain[rownumber][13]+"</td>";
+						}else{
+								tableMain += "<td> --> "+dataMain[rownumber][14]+"</td>";
+						}
+
+
+            tableMain += "<td align='center'>";
+
+						if(dataMain[rownumber][15] == 1){
+							tableMain += "<i style='color:#f1c40f' class='fa fa-star' aria-hidden='true'></i>&nbsp;&nbsp;";
+						}else{
+							tableMain += "&nbsp;&nbsp;";
+						}
+
+						if(dataMain[rownumber][12] == 1){
+							tableMain += "<i style='color:#1d9d74' class='fa fa-check-circle' aria-hidden='true'></i>&nbsp;&nbsp;";
+						}else{
+							tableMain += "<i style='color:#e74c3c' class='fa fa-times-circle' aria-hidden='true'></i>&nbsp;&nbsp;";
+						}
+            tableMain += "<button type='button' class='btn btn-xs btn-default' onclick='getData("+rownumber+")' data-toggle='tooltip' data-placement='top' data-original-title='Ubah'>";
+            tableMain += "<span class='glyphicon glyphicon-pencil'></span>";
+            tableMain += "</button>&nbsp;";
+            tableMain += "<button type='button' class='remove-news btn btn-xs btn-default' onclick='confirmationAction(\"delete\","+rownumber+")' data-toggle='tooltip' data-placement='top' data-original-title='Hapus'>";
+            tableMain += "<span class='glyphicon glyphicon-trash'></span>";
+            tableMain += "</button>";
+			tableMain += "</td>";
+
+            tableMain += "</tr>";
+
+            rownumber++;
+        }
+    }
+    //document.getElementById("GridView_DataMain").innerHTML = tableMain;
+    dataTables.rows.add($(tableMain)).draw();
+}
+
+function renderSelectMenu(returnData) {
+
+    var obj = JSON.parse(returnData);
+
+    var rownumber = 0;
+    var tableMain = "";
+    var i = 1;
+    var p = obj.data;
+		// apabila balikan data kosong maka masuk if ini
+		if(p[rownumber] == undefined){
+			dataTables.rows.add($(tableMain)).draw();
+			return;
+		}
+    var totalfield = Object.keys(p[rownumber]).length;
+
+    dataSelectMenu = new Array();
+    for (var key in p) {
+      if (p.hasOwnProperty(key)) {
+
+            // deklarasi array dua dimensi
+            dataSelectMenu.push(new Array())
+
+            // looping field sebanyak balikan dari controller
+            for(l=1; l<=totalfield; l++){
+                dataSelectMenu[rownumber][l] = p[key]['N'+l];
+            }
+						tableMain += "<option value='"+dataSelectMenu[rownumber][1]+"'>"+dataSelectMenu[rownumber][2]+"</option>";
+
+            rownumber++;
+        }
+    }
+    document.getElementById("form_main_insertupdate_parentedto").innerHTML = tableMain;
+}
+
+
+function renderSelectFile(returnData) {
+
+    var obj = JSON.parse(returnData);
+
+    var rownumber = 0;
+    var tableMain = "";
+    var i = 1;
+    var p = obj.data;
+		// apabila balikan data kosong maka masuk if ini
+		if(p[rownumber] == undefined){
+			dataTables.rows.add($(tableMain)).draw();
+			return;
+		}
+    var totalfield = Object.keys(p[rownumber]).length;
+
+    dataSelectFile = new Array();
+    for (var key in p) {
+      if (p.hasOwnProperty(key)) {
+
+            // deklarasi array dua dimensi
+            dataSelectFile.push(new Array())
+
+            // looping field sebanyak balikan dari controller
+            for(l=1; l<=totalfield; l++){
+                dataSelectFile[rownumber][l] = p[key]['N'+l];
+            }
+						tableMain += "<option value='"+dataSelectFile[rownumber][1]+"'>"+dataSelectFile[rownumber][2]+"</option>";
+
+            rownumber++;
+        }
+    }
+    document.getElementById("form_main_insertupdate_filename").innerHTML = tableMain;
+}
+
+
+
+//===================================================================================================================
+//======================================================== END : RENDER TABLE =======================================
+//===================================================================================================================
+
+
+
+//===================================================================================================================
+//================================================== BEGIN : SELECT DATA MAIN =======================================
+//===================================================================================================================
+
+function selectData(){
+    // PERSIAPAN PENGIRIMAN
+	whattodo = "s801cda9c0408e05b4c359ae69ad22758_1";
+	NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+  // SETTING KIRIMAN
+  kiriman[1] = '';
+
+  NN.pleaseWait(true);
+  // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+  NN.callService(kiriman);
+  // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+  // JIKA TIDAK MAKA AKAN TERJADI ERROR
+  renderTable(NN.backService(watermark));
+
+  NN.pleaseWait(false);
+}
+
+function selectDataMenu(){
+    // PERSIAPAN PENGIRIMAN
+	whattodo = "s801cda9c0408e05b4c359ae69ad22758_2";
+	NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+  // SETTING KIRIMAN
+  kiriman[1] = '';
+
+  NN.pleaseWait(true);
+  // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+  NN.callService(kiriman);
+  // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+  // JIKA TIDAK MAKA AKAN TERJADI ERROR
+  renderSelectMenu(NN.backService(watermark));
+
+  NN.pleaseWait(false);
+}
+
+function selectDataFile(){
+    // PERSIAPAN PENGIRIMAN
+	whattodo = "s801cda9c0408e05b4c359ae69ad22758_3";
+	NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+  // SETTING KIRIMAN
+  kiriman[1] = '';
+
+  NN.pleaseWait(true);
+  // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+  NN.callService(kiriman);
+  // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+  // JIKA TIDAK MAKA AKAN TERJADI ERROR
+  renderSelectFile(NN.backService(watermark));
+
+  NN.pleaseWait(false);
+}
+
+
+//===================================================================================================================
+//================================================== BEGIN : SELECT DATA MAIN =======================================
+//===================================================================================================================
+
+
+//===================================================================================================================
+//================================================== BEGIN : INSERT DATA MAIN =======================================
+//===================================================================================================================
+function insertData(){
+    // CLOSE CONFIRMATION
+	$("#modal_confirmation").modal('hide');
+
+	// PERSIAPAN PENGIRIMAN
+	whattodo = "i801cda9c0408e05b4c359ae69ad22758_1";
+	NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+
+    // SETTING KIRIMAN
+    kiriman[1] = '';
+    kiriman[2] = (document.getElementById('form_main_insertupdate_level1').checked == true ? 1 : 2);
+    kiriman[3] = document.getElementById('form_main_insertupdate_namamenu').value;
+    kiriman[4] = (document.getElementById('form_main_insertupdate_adafile1').checked == true ? document.getElementById('form_main_insertupdate_filename').value : 1);
+    kiriman[5] = document.getElementById('form_main_insertupdate_keterangan').value;
+    kiriman[6] = (document.getElementById('form_main_insertupdate_level1').checked == true ? 1 : document.getElementById('form_main_insertupdate_parentedto').value);
+    kiriman[7] = (document.getElementById('form_main_insertupdate_isactivated').checked == true ? 1 : 0);
+    kiriman[8] = document.getElementById('form_main_insertupdate_urutanke').value;
+    kiriman[9] = (document.getElementById('form_main_insertupdate_isdashboard').checked == true ? 1 : 0);
+
+		NN.pleaseWait(true);
+		// NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+		NN.callService(kiriman);
+
+		// BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+		// JIKA TIDAK MAKA AKAN TERJADI ERROR
+		renderTable(NN.backService(watermark));
+
+		afterInsertUpdate();
+		NN.pleaseWait(false);
+}
+
+//===================================================================================================================
+//================================================== END : INSERT DATA MAIN =========================================
+//===================================================================================================================
+
+
+//===================================================================================================================
+//================================================== BEGIN : UPDATE DATA MAIN =======================================
+//===================================================================================================================
+
+
+function getData(ROW){
+	clearForm();
+	if(dataMain[ROW][6] == 1){	// JIKA MENU LEVEL 1 YANG DI UPDATE
+			document.getElementById('form_main_insertupdate_level1').click();
+			document.getElementById('form_main_insertupdate_namamenu').value = dataMain[ROW][4];
+			document.getElementById('form_main_insertupdate_urutanke').value = dataMain[ROW][13];
+	}else{	// JIKA MENU LEVEL 2 YANG DI UPDATE
+			document.getElementById('form_main_insertupdate_level2').click();
+			document.getElementById('form_main_insertupdate_parentedto').value = dataMain[ROW][1];
+			document.getElementById('select2-form_main_insertupdate_parentedto-container').innerHTML = dataMain[ROW][4];
+			document.getElementById('form_main_insertupdate_namamenu').value = dataMain[ROW][5];
+			document.getElementById('form_main_insertupdate_urutanke').value = dataMain[ROW][14];
+	}
+
+	// JIKA ADA FILE MAKA AKAN MASUK KONDISI INI
+	if(dataMain[ROW][3] != 1){
+		document.getElementById('form_main_insertupdate_adafile1').click();
+		document.getElementById('form_main_insertupdate_filename').value = dataMain[ROW][3];
+		document.getElementById('select2-form_main_insertupdate_filename-container').innerHTML = dataMain[ROW][8];
+	}else{
+		document.getElementById('form_main_insertupdate_adafile2').click();
+	}
+
+	if(dataMain[ROW][12] == 1){
+			document.getElementById('form_main_insertupdate_isactivated').checked = true;
+	}else{
+			document.getElementById('form_main_insertupdate_isactivated').checked = false;
+	}
+	
+	
+	if(dataMain[ROW][15] == 1){
+			document.getElementById('form_main_insertupdate_isdashboard').checked = true;
+	}else{
+			document.getElementById('form_main_insertupdate_isdashboard').checked = false;
+	}
+
+	document.getElementById('form_main_insertupdate_keterangan').value = dataMain[ROW][7];
+
+	openForm('update',ROW);
+	NN.scrollTop();
+}
+
+function updateData(ROW){
+
+	$("#modal_confirmation").modal('hide');
+
+	var id = dataMain[ROW][2];
+	// PERSIAPAN PENGIRIMAN
+	whattodo = "u801cda9c0408e05b4c359ae69ad22758_1";
+	NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+    // SETTING KIRIMAN
+    kiriman[1] = id;
+    kiriman[2] = (document.getElementById('form_main_insertupdate_level1').checked == true ? 1 : 2);
+    kiriman[3] = document.getElementById('form_main_insertupdate_namamenu').value;
+    kiriman[4] = (document.getElementById('form_main_insertupdate_adafile1').checked == true ? document.getElementById('form_main_insertupdate_filename').value : 1);
+    kiriman[5] = document.getElementById('form_main_insertupdate_keterangan').value;
+    kiriman[6] = (document.getElementById('form_main_insertupdate_level1').checked == true ? 1 : document.getElementById('form_main_insertupdate_parentedto').value);
+    kiriman[7] = (document.getElementById('form_main_insertupdate_isactivated').checked == true ? 1 : 0);
+    kiriman[8] = document.getElementById('form_main_insertupdate_urutanke').value;
+    kiriman[9] = (document.getElementById('form_main_insertupdate_isdashboard').checked == true ? 1 : 0);
+
+		NN.pleaseWait(true);
+    // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+    NN.callService(kiriman);
+    // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+    // JIKA TIDAK MAKA AKAN TERJADI ERROR
+    renderTable(NN.backService(watermark));
+  	afterInsertUpdate();
+  	NN.pleaseWait(false);
+
+}
+//===================================================================================================================
+//================================================== END : UPDATE DATA MAIN =========================================
+//===================================================================================================================
+
+
+//===================================================================================================================
+//================================================== BEGIN : DELETE DATA MAIN =======================================
+//===================================================================================================================
+function deleteData(ROW){
+	// PERSIAPAN PENGIRIMAN
+
+	$("#modal_confirmation").modal('hide');
+
+	var id = dataMain[ROW][2];
+	var id_file = dataMain[ROW][3];
+
+
+	whattodo = "d801cda9c0408e05b4c359ae69ad22758_1";
+	NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+    // SETTING KIRIMAN
+    kiriman[1] = id;
+    kiriman[2] = id_file;
+
+
+	NN.pleaseWait(true);
+  // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+  NN.callService(kiriman);
+  // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+  // JIKA TIDAK MAKA AKAN TERJADI ERROR
+  renderTable(NN.backService(watermark));
+	selectDataSidebar();
+	$('#alert_success').slideDown('fast').fadeTo(3000, 500).slideUp('fast', function () { $('#alert_success').hide(); });
+	NN.scrollTop();
+	NN.pleaseWait(false);
+}
+//===================================================================================================================
+//================================================== END : DELETE DATA MAIN =========================================
+//===================================================================================================================
+
+
+
+
+//===================================================================================================================
+//======================================= BEGIN : FUNCTION OPEN MODAL GET DATA ======================================
+//===================================================================================================================
+
+// akan di isi modal
+
+//===================================================================================================================
+//======================================= END : FUNCTION OPEN MODAL GET DATA ========================================
+//===================================================================================================================
+
+
+
+//===================================================================================================================
+//======================================= BEGIN : FUNCTION ADD OTHER  ===============================================
+//===================================================================================================================
+
+function confirmationAction(AKSI,ROW){
+	if(AKSI == 'insert'){ // KETIKA TOMMBOL SAVE SAAT MENYIMPAN DATA DI KLIK
+		if(validasiForm() == false){
+			return false;
+		}
+		insertData();
+		document.getElementById('alert-text-success').innerHTML = 'Data Berhasil di tambah';
+	}else if(AKSI == 'update'){ // KETIKA TOMMBOL SAVE SAAT EDIT DATA DI KLIK
+		if(validasiForm() == false){
+			return false;
+		}
+		// UNTUK MENGUBAH FUNCTION ONCLICK MENJADI EDIT DATA
+		$('#button_aply').attr('onclick', 'updateData('+ROW+')');
+		document.getElementById('text-confirmation').innerHTML = 'LANJUTKAN UBAH DATA ?';
+		document.getElementById('alert-text-success').innerHTML = 'Data Berhasil di ubah';
+	}else if(AKSI == 'delete'){ // KETIKA TOMMBOL DELETE DI KLIK
+		// UNTUK MENGUBAH FUNCTION ONCLICK MENJADI EDIT DATA
+		$('#button_aply').attr('onclick', 'deleteData('+ROW+')');
+		if(dataMain[ROW][3] == 1){
+		    document.getElementById('text-confirmation').innerHTML = 'MENGHAPUS MENU HEADER AKAN MENGHAPUS SELURUH SUBMENU, LANJUTKAN ?';
+		}else{
+		    document.getElementById('text-confirmation').innerHTML = 'LANJUTKAN HAPUS DATA ?';
+		}
+		document.getElementById('alert-text-success').innerHTML = 'Data Berhasil di hapus';
+	}else if(AKSI == 'close'){
+		// UNTUK MENGUBAH FUNCTION ONCLICK MENJADI CLOSE DATA
+		$('#button_aply').attr('onclick', 'closeForm()');
+		document.getElementById('text-confirmation').innerHTML = 'FIELD YANG SUDAH DI ISI AKAN TERHAPUS, LANJUTKAN TUTUP FORM ?';
+
+	}
+
+    if(AKSI != 'insert'){
+	    $("#modal_confirmation").modal('show');
+    }
+
+}
+
+function validasiForm(){
+	var isValid = true;
+
+
+	if((document.getElementById('form_main_insertupdate_level1').checked == false) && (document.getElementById('form_main_insertupdate_level2').checked == false)){
+			document.getElementById('form_main_insertupdate_level_validasi').style.background = NN.colorEmpty();
+			isValid = false;
+	}else{
+			document.getElementById('form_main_insertupdate_level_validasi').style.background = NN.colorDefault();
+	}
+
+	if(document.getElementById('form_main_insertupdate_adafile1').checked == false && document.getElementById('form_main_insertupdate_adafile2').checked == false){
+			document.getElementById('form_main_insertupdate_adafile_validasi').style.background = NN.colorEmpty();
+			isValid = false;
+	}else{
+			document.getElementById('form_main_insertupdate_adafile_validasi').style.background = NN.colorDefault();
+	}
+
+	if(document.getElementById('form_main_insertupdate_namamenu').value == ""){
+		document.getElementById('form_main_insertupdate_namamenu').style.background = NN.colorEmpty();
+		isValid = false;
+	}else{
+		document.getElementById('form_main_insertupdate_namamenu').style.background = NN.colorDefault();
+	}
+
+	if(document.getElementById('form_main_insertupdate_keterangan').value == ""){
+		document.getElementById('form_main_insertupdate_keterangan').style.background = NN.colorEmpty();
+		isValid = false;
+	}else{
+		document.getElementById('form_main_insertupdate_keterangan').style.background = NN.colorDefault();
+	}
+
+	if(document.getElementById('form_main_insertupdate_level2').checked == true){
+			if(document.getElementById('form_main_insertupdate_parentedto').value == ""){
+				$('#select2-form_main_insertupdate_parentedto-container').parent('span').css({"background-color": NN.colorEmpty()});
+				isValid = false;
+			}else{
+				$('#select2-form_main_insertupdate_parentedto-container').parent('span').css({"background-color": NN.colorDefault()});
+			}
+	}
+
+	if(document.getElementById('form_main_insertupdate_adafile1').checked == true){
+			if(document.getElementById('form_main_insertupdate_filename').value == ""){
+				$('#select2-form_main_insertupdate_filename-container').parent('span').css({"background-color": NN.colorEmpty()});
+				isValid = false;
+			}else{
+				$('#select2-form_main_insertupdate_filename-container').parent('span').css({"background-color": NN.colorDefault()});
+			}
+	}
+
+
+	if(isValid == false){
+	    $('#alert_warning').slideDown('fast').fadeTo(3000, 500).slideUp('fast', function () { $('#alert_warning').hide(); });
+		document.getElementById('alert-text-warning').innerHTML = 'Masih ada yang belum di isi.';
+		NN.scrollTop();
+		return isValid;
+	}
+}
+
+function clearForm(){
+	$('.isclear').val('');
+	$('.isclear').css({"background-color": NN.colorDefault()});
+
+	document.getElementById('form_main_insertupdate_level1').checked = false;
+	document.getElementById('form_main_insertupdate_level2').checked = false;
+	document.getElementById('form_main_insertupdate_adafile1').checked = false;
+	document.getElementById('form_main_insertupdate_adafile2').checked = false;
+	document.getElementById('pilihan_menu').style.display = 'none';
+	document.getElementById('pilihan_submenu').style.display = 'none';
+	document.getElementById('pilihan_filename').style.display = 'none';
+	document.getElementById('isanyfile').style.display = 'none';
+	document.getElementById('select2-form_main_insertupdate_parentedto-container').innerHTML = '';
+	document.getElementById('select2-form_main_insertupdate_filename-container').innerHTML = '';
+	document.getElementById('form_main_insertupdate_isactivated').checked = true;
+
+
+}
+
+function openForm(ISOPEN,ROW){
+	if (ISOPEN == 'insert'){
+		document.getElementById('nameformpanel').innerHTML = 'TAMBAH DATA';
+		clearForm();
+		// UNTUK MENGUBAH FUNCTION ONCLICK MENJADI INSERT DATA
+		$('#button_save').attr('onclick', 'confirmationAction("insert")');
+	    $("#box_form_insertupdate").slideDown("fast");
+
+	}else{
+		document.getElementById('nameformpanel').innerHTML = 'UBAH DATA';
+		// UNTUK MENGUBAH FUNCTION ONCLICK MENJADI EDIT DATA
+		$('#button_save').attr('onclick', 'confirmationAction("update",'+ROW+')');
+	    $("#box_form_insertupdate").slideDown("fast");
+	}
+	NN.scrollTop();
+}
+
+function closeForm(){
+	$("#modal_confirmation").modal('hide');
+	document.getElementById('nameformpanel').innerHTML = '';
+	$("#box_form_insertupdate").slideUp("fast");
+	clearForm();
+}
+
+function afterInsertUpdate(){
+	$('#alert_success').slideDown('fast').fadeTo(3000, 500).slideUp('fast', function () { $('#alert_success').hide(); });
+	closeForm();
+
+	// REFRESH DROPDOWN DATA MENU
+	selectDataMenu();
+	selectDataSidebar();
+}
+
+function dataTablef(){
+    dataTables = $('#example1').DataTable( {
+    lengthChange: false,
+		pageLength : 200,
+    //buttons: ['excel', 'pdf', 'colvis']
+    buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fa fa-file-excel-o"></i> Excel',
+                    //titleAttr: 'Export to Excel',
+                    title: 'Data_User',
+                    exportOptions: {
+                          //columns: [ 0, 1, 2, 3, 4, 5 ], setting statis kolom yang akan di export
+                          //columns: [':not(:last-child)'], hanya untuk kolom terakhir yang tidak di export
+                          columns: ':visible:not(.not-export-col)', // sesui show hide kolom
+                          modifier : {
+                          // DataTables core
+                          order : 'applied',  // 'current', 'applied', 'index',  'original'
+                          page : 'current',      // 'all',     'current'
+                          search : 'applied'     // 'none',    'applied', 'removed'
+                        }
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="fa fa-file-pdf-o"></i> PDF',
+                    title: 'Data_User',
+                    exportOptions: {
+                          columns: ':visible:not(.not-export-col)',
+                          modifier : {
+                          order : 'applied',
+                          page : 'current',
+                          search : 'applied'
+                        }
+                    }
+                },
+                {
+                  extend: 'print',
+                  text: '<i class="fa fa-print"></i> Print',
+                  title: 'Data_User',
+                  exportOptions: {
+                        columns: ':visible:not(.not-export-col)',
+                        modifier : {
+                        order : 'applied',
+                        page : 'current',
+                        search : 'applied'
+                      }
+                  }
+                },
+                {
+                  extend: 'colvis',
+                  text: '<i class="fa fa-eye"> Lihat Kolom</i>',
+                  columns: ':gt(0)', // list awal kolom tidak tampil
+                  //columns: ':not(.noVis)' // list yang menggunkan class noVis tidak tampil
+                }
+            ],
+            columnDefs: [
+              {
+                 // membuat class pada kolom awal dan akhir
+                  targets: [0, -1],
+                  className: 'noVis'
+              },
+              {
+                 // kolom akhir tidak bisa di ordering
+                  targets: [-1],
+                  "orderable": false
+              },
+              {
+                  // kolom 6 di hide saat awal default
+                  // targets: [5],
+                  // "bVisible": false
+              }
+            ],
+
+
+    });
+    dataTables.buttons().container().appendTo('#example1_wrapper .col-sm-6:eq(0)');
+  }
+
+	function chooseLevel(){
+			if(document.getElementById('form_main_insertupdate_level1').checked == true){
+				$('#pilihan_menu').show();
+				$('#pilihan_submenu').hide();
+				$('#isanyfile').show();
+			}else{
+				$('#pilihan_menu').show();
+				$('#pilihan_submenu').show();
+				$('#isanyfile').show();
+			}
+	}
+
+
+	function chooseFile(){
+			if(document.getElementById('form_main_insertupdate_adafile1').checked == true){
+				$('#pilihan_filename').show();
+			}else{
+				$('#pilihan_filename').hide();
+			}
+	}
+
+//===================================================================================================================
+//======================================= END : FUNCTION ADD OTHER  =================================================
+//===================================================================================================================
+
+</script>
+
+
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <!-- <h1>
+      OLAH DATA PENGGUNA
+      <small>rincian pengguna</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><a href="#">Tables</a></li>
+      <li class="active">Data tables</li>
+    </ol> -->
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+
+
+		<!-- //======================= BEGIN : ALERT AND NOTIFICATION =============================================== -->
+		<div class="row">
+			<div class="col-xs-12">
+
+
+				<div class="callout callout-success" id="alert_success" style="display:none;">
+						<h4><i class="icon fa fa-check"></i> Berhasil!</h4>
+	          <p id='alert-text-success'></p>
+        </div>
+				<div class="callout callout-warning" id="alert_warning" style="display:none;">
+						<h4><i class="icon fa fa-warning"></i> Peringatan!</h4>
+	          <p id='alert-text-warning'></p>
+        </div>
+				<div class="callout callout-info" id="alert_info" style="display:none;">
+						<h4><i class="icon fa fa-info"></i> Pemberitahuan!</h4>
+	          <p id='alert-text-info'></p>
+        </div>
+				<div class="callout callout-danger" id="alert_danger" style="display:none;">
+						<h4><i class="icon fa fa-ban"></i> Bahaya!</h4>
+	          <p id='alert-text-danger'></p>
+        </div>
+
+
+			</div>
+		</div>
+		<!-- //======================= END : ALERT AND NOTIFICATION  ================================================ -->
+
+
+
+    <div class="row">
+      <div class="col-xs-12">
+
+
+        <!-- form box -->
+        <div class="box box-primary" id="box_form_insertupdate" style="display:none;">
+          <div class="box-header with-border">
+            <h3 class="box-title" id="nameformpanel"></h3>
+
+            <div class="box-tools pull-right">
+              <button type="button" class="btn btn-box-tool" data-widget="collapse" id="buttoncloseform_insertupdate" style="display:none"><i class="fa fa-plus"></i></button>
+              <!-- <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button> -->
+              <!-- <button type="button" class="btn btn-box-tool" data-widget="remove" id="buttoncloseform_insertupdate"><i class="fa fa-remove"></i></button> -->
+            </div>
+          </div>
+          <!-- /.box-header -->
+          <div class="box-body">
+						<div class="row">
+              <!-- /.col -->
+              <div class="col-md-6">
+
+								<!-- radio -->
+	              <div class="form-group">
+									<label>LEVEL</label>
+	                <div class="col-md-12" id="form_main_insertupdate_level_validasi">
+	                	<div class="col-md-4 col-sm-4">
+										<label>
+		                  <input type="radio" onclick="chooseLevel();" name="form_main_insertupdate_level" id="form_main_insertupdate_level1">
+											MENU
+		                </label>
+										</div>
+		                <div class="col-md-4 col-sm-4">
+		                <label>
+		                  <input type="radio" onclick="chooseLevel();" name="form_main_insertupdate_level" id="form_main_insertupdate_level2">
+											SUB MENU
+		                </label>
+										</div>
+		                <div class="col-md-4 col-sm-4">
+										</div>
+									</div>
+	              </div>
+
+
+							<div class="form-group" id="pilihan_menu" style="display:none;">
+								<label>NAMA MENU</label>
+								<input class="form-control isclear" type="text" id="form_main_insertupdate_namamenu">
+							</div>
+
+                            <div class="form-group" id="pilihan_submenu" style="display:none;">
+                                <label>TERHUBUNG DENGAN MENU</label>
+                                <select class="form-control select2 isclear" id="form_main_insertupdate_parentedto" style="width: 100%;">
+                                </select>
+                            </div>
+
+							<div class="form-group" id="isanyfile" style="display:none;">
+								<label>ADA FILE</label>
+								<div class="col-md-12" id="form_main_insertupdate_adafile_validasi">
+									<div class="col-md-4 col-sm-4">
+									<label>
+										<input type="radio" onclick="chooseFile();" name="form_main_insertupdate_adafile" id="form_main_insertupdate_adafile1" class="minimal">
+										ADA
+									</label>
+									</div>
+									<div class="col-md-4 col-sm-4">
+									<label>
+										<input type="radio" onclick="chooseFile();" name="form_main_insertupdate_adafile" id="form_main_insertupdate_adafile2" class="minimal">
+										TIDAK ADA
+									</label>
+									</div>
+									<div class="col-md-4 col-sm-4">
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group" id="pilihan_filename" style="display:none;">
+                <label>FILE NAME</label>
+                <select class="form-control select2 isclear" id="form_main_insertupdate_filename" style="width: 100%;">
+                  <!-- <option>view_mst_agama</option>
+                  <option>view_sys_file</option>
+                  <option>view_sys_menu</option>
+                  <option>view_sys_user</option>
+                  <option>view_dashboard</option> -->
+                </select>
+            	</div>
+
+              </div>
+              <!-- /.col -->
+              <div class="col-md-6">
+
+                <div class="form-group">
+                  <label>KETERANGAN</label>
+                  <textarea class="form-control isclear" rows="5" id="form_main_insertupdate_keterangan"></textarea>
+              	</div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>AKTIF</label>
+                            <div class="col-md-12">
+                                <label class="switch">
+                                <input type="checkbox" checked id="form_main_insertupdate_isactivated">
+                                <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>URUTAN KE</label>
+                            <input class="form-control isclear" type="text" id="form_main_insertupdate_urutanke" onkeypress="return NN.hanyaAngka(event)">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>DASHBOARD</label>
+                            <div class="col-md-12">
+                                <label class="switch">
+                                <input type="checkbox" id="form_main_insertupdate_isdashboard">
+                                <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+              </div>
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- /.box-body -->
+          <div class="box-footer">
+            *form ini digunakan untuk tambah atau edit data
+            <div class="btn-group pull-right">
+              <button type="button" class="btn btn-primary btn-sm" id="button_save"><i class="fa fa-fw fa-save"></i> SIMPAN</button>
+	            <button type="button" class="btn btn-default btn-sm" onclick="confirmationAction('close');"><i class="fa fa-fw fa-close"></i> TUTUP</button>
+            </div>
+          </div>
+        </div>
+        <!-- form box -->
+
+				<!-- table box -->
+        <div class="box box-primary">
+          <div class="box-header with-border">
+            <!-- <h3 class="box-title">DATA OBAT</h3> -->
+						<button type="button" onclick="openForm('insert');" class="btn btn-primary btn-sm"><i class="fa fa-fw fa-plus-square"></i> Tambah</button>
+						<button type="button" onclick="selectData();" class="btn btn-primary btn-sm"><i class="fa fa-fw fa-refresh"></i> Refresh</button>
+						<div class="box-tools pull-right">
+              <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+              <!-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button> -->
+            </div>
+          </div>
+          <div class="box-header">
+            <!-- <h3 class="box-title">Data Table With Full Features</h3> -->
+          </div>
+          <!-- /.box-header -->
+          <div class="box-body">
+						<table id="example1" class="table table-bordered table-striped table-hover">
+              <thead>
+              <tr>
+                <th class="numberwidth">NO</th>
+                <th>NAMA MENU</th>
+                <th>LEVEL</th>
+                <th>KETERANGAN</th>
+                <th>NAMA VIEW</th>
+                <th class="actionwidth">URUTAN</th>
+                <th style="width:100px;">AKSI</th>
+              </tr>
+              </thead>
+              <tbody id="GridView_DataMain"></tbody>
+              <tfoot>
+              <tr>
+                <th class="numberwidth">NO</th>
+                <th>NAMA MENU</th>
+                <th>LEVEL</th>
+                <th>KETERANGAN</th>
+                <th>NAMA VIEW</th>
+                <th class="actionwidth">URUTAN</th>
+                <th style="width:100px;">AKSI</th>
+              </tr>
+              </tfoot>
+            </table>
+          </div>
+          <!-- /.box-body -->
+        </div>
+        <!-- table box -->
+
+
+
+      </div>
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+  </section>
+  <!-- /.content -->
+
+
+
+<!-- ============================ BEGIN : MODAL CONFIRMATION ==================================================== -->
+<div class="modal modal-default fade" id="modal_confirmation">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">KONFIRMASI</h4>
+      </div>
+      <div class="modal-body">
+        <p id="text-confirmation"></p>
+      </div>
+      <div class="modal-footer">
+				<button type="button" class="btn btn-default pull-left btn-sm" id="button_aply">YA</button>
+        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">TIDAK</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- ============================ END : MODAL CONFIRMATION ====================================================== -->
+
+
+
+
+<!-- /.content-wrapper -->
+
+<!-- Select2 -->
+<script src="frontend/bower_components/select2/dist/js/select2.full.min.js"></script>
+
+<!-- Bootstrap 3.3.7 -->
+<script src="frontend/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="frontend/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="frontend/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="frontend/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- iCheck 1.0.1 -->
+<script src="frontend/plugins/iCheck/icheck.min.js"></script>
+<!-- FastClick -->
+<script src="frontend/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="frontend/dist/js/demo.js"></script>
+<!-- page script -->
+
+<!-- kebutuhan dataTable -->
+<script src="frontend/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/dataTables.buttons.min.js"></script>
+<script src="frontend/bower_components/datatables.net-bs/js/buttons.bootstrap.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.flash.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/jszip.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/pdfmake.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/vfs_fonts.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.html5.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.print.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.colVis.min.js"></script>
+
+<script>
+
+
+//===================================================================================================================
+//============================= BEGIN : HALAMAN LOAD SETELAH SEMUA DOM HTML SELESAI =================================
+//===================================================================================================================
+	$(document).ready(function(){
+    dataTablef();
+		selectDataMenu();
+		selectDataFile();
+		selectData();
+
+    //Initialize Select2 Elements
+    $('.select2').select2();
+
+    document.getElementById("select2-form_main_insertupdate_parentedto-container").innerHTML = '';
+    document.getElementById("select2-form_main_insertupdate_filename-container").innerHTML = '';
+
+
+	});
+
+
+		// $('#form_main_insertupdate_level1').on('ifChecked', function(event){
+		//   alert(event.type + ' callback');
+		// });
+
+  //===================================================================================================================
+  //============================= END : HALAMAN LOAD SETELAH SEMUA DOM HTML SELESAI ===================================
+  //===================================================================================================================
+
+
+
+
+</script>

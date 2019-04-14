@@ -1,0 +1,918 @@
+<!--
+    ==================================== BEGIN: INFO FILES ======================================
+    VIEW       : view_sys_group.html
+    CONTROLLER : controller_sys_group.nfh.php
+    SP	       : sp_sys_group
+    MODEL      : NNclass.php
+    ==================================== END: INFO FILES ========================================
+ -->
+
+
+<!-- ===================================================================================================================================
+===================================================== BEGIN : SCRIPT JAVASCRIPT ========================================================
+==================================================================================================================================== -->
+<script type="text/javascript">
+
+//==================================================================================================================//
+//========================================== BEGIN : DEKLARASI VARIABLE GLOBAL =====================================//
+
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX BEGIN : JANGAN DI UBAH ! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+watermark = 'NPL'; // JIKA DI UBAH AKAN ADA ERROR
+controller = urlparamsplit[0];
+namesp = urlparamsplit[1];
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX END : JANGAN DI UBAH ! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// DISESUIKAN DENGAN JUMLAH PARAMETER YANG AKAN DITAMPUNG PADA PARAMETER STORE PROCEDURE
+// JUMLAH MAXIMAL BERADA PADA SERVICEGATEWAY $max_param
+// AKAN TERJADI ERROR APABILA JUMLAH YANG DI ISI DISINI TIDAK SESUAI JUMLAH PENAMPUNG DI SP
+var max_param_sp = 10;
+
+
+// UNTUK RENDER DATA ARRAY
+var dataMain;
+
+// UNTUK VARIABLE DATATABEL
+var dataTables;
+//======================================= END : DEKLARASI VARIABLE GLOBAL ==========================================//
+//==================================================================================================================//
+
+
+//===================================================================================================================
+//======================================= BEGIN : RENDER TABLE ======================================================
+//===================================================================================================================
+
+function renderTable(returnData) {
+
+    // CLEAR TABLE RENDER
+	  dataTables.clear().draw();
+
+    var obj = JSON.parse(returnData);
+
+    var rownumber = 0;
+    var tableMain = "";
+    var i = 1;
+    var p = obj.data;
+		// apabila balikan data kosong maka masuk if ini
+		if(p[rownumber] == undefined){
+			dataTables.rows.add($(tableMain)).draw();
+			return;
+		}
+    var totalfield = Object.keys(p[rownumber]).length;
+
+    dataMain = new Array();
+    for (var key in p) {
+      if (p.hasOwnProperty(key)) {
+
+            // deklarasi array dua dimensi
+            dataMain.push(new Array())
+
+            // looping field sebanyak balikan dari controller
+            for(l=1; l<=totalfield; l++){
+                dataMain[rownumber][l] = p[key]['N'+l];
+            }
+
+			tableMain += "<tr id = \"" + "RowMain" + i + "\"" + ">";
+
+			tableMain += "<td class='text-center'>"+(i++)+"</td>";
+
+			tableMain += "<td>"+dataMain[rownumber][2]+"</td>";
+			tableMain += "<td>"+dataMain[rownumber][3]+"</td>";
+
+            tableMain += "<td align='center'>";
+            tableMain += "<button type='button' class='btn btn-xs btn-default' onclick='getData("+rownumber+")' data-toggle='tooltip' data-placement='top' data-original-title='Ubah'>";
+            tableMain += "<span class='glyphicon glyphicon-pencil'></span>";
+            tableMain += "</button>&nbsp;";
+            tableMain += "<button type='button' class='remove-news btn btn-xs btn-default' onclick='confirmationAction(\"delete\","+rownumber+")' data-toggle='tooltip' data-placement='top' data-original-title='Hapus'>";
+            tableMain += "<span class='glyphicon glyphicon-trash'></span>";
+            tableMain += "</button>&nbsp;";
+            tableMain += "<button type='button' class='remove-news btn btn-xs btn-default' onclick='openDataMenu("+rownumber+");' data-toggle='tooltip' data-placement='top' data-original-title='Hapus'>";
+            tableMain += "menu";
+            tableMain += "</button>";
+			tableMain += "</td>";
+
+            tableMain += "</tr>";
+
+            rownumber++;
+        }
+    }
+    //document.getElementById("GridView_DataMain").innerHTML = tableMain;
+    dataTables.rows.add($(tableMain)).draw();
+}
+
+
+
+function renderSelectMenu(returnData) {
+
+var obj = JSON.parse(returnData);
+
+arr_menu_send = Array();
+var rownumber = 0;
+var tableMain = "";
+var menuheader = "";
+var i = 1;
+var p = obj.data;
+// apabila balikan data kosong maka masuk if ini
+if(p[rownumber] == undefined){
+  document.getElementById("GridView_DataMenu").innerHTML = tableMain;
+$('#button_savegroupmenumodal').attr('disabled', 'disabled');
+$('#button_savegroupmenumodal').attr('onclick', '');
+  
+  return;
+}
+var totalfield = Object.keys(p[rownumber]).length;
+
+dataSelectMenu = new Array();
+for (var key in p) {
+  if (p.hasOwnProperty(key)) {
+
+        // deklarasi array dua dimensi
+        dataSelectMenu.push(new Array())
+
+        // looping field sebanyak balikan dari controller
+        for(l=1; l<=totalfield; l++){
+            dataSelectMenu[rownumber][l] = p[key]['N'+l];
+        }
+
+
+
+        tableMain += "<tr id_menu='"+dataSelectMenu[rownumber][7]+"' level='"+dataSelectMenu[rownumber][6]+"' id = \"" + "RowSelectMenu" + i + "\"" + " onclick='clickCheck(this ," + dataSelectMenu[rownumber][1] + ")'>";
+
+        tableMain += "<td class='text-center'>"+(i++)+"</td>";
+
+        if(menuheader == dataSelectMenu[rownumber][2]){
+          tableMain += "<td></td>";
+        }else{
+          tableMain += "<td>"+dataSelectMenu[rownumber][2]+"</td>";
+        }
+        tableMain += "<td>"+dataSelectMenu[rownumber][3]+"</td>";
+
+        if(dataSelectMenu[rownumber][4] == 1){
+            arr_menu_send.push(dataSelectMenu[rownumber][1]);
+        }
+
+        tableMain += "<td class='text-center'>";
+        if(dataSelectMenu[rownumber][4] == 1){ // ISACTIVATED BY GROUP USER
+            if(dataSelectMenu[rownumber][6] == 1){
+                tableMain += "<input checked style='cursor:pointer' class='checkParent' type='checkbox' id='form_menu_modal_checked_"+ rownumber +"' onclick='setMenu(this ," + dataSelectMenu[rownumber][1] + ")'>";
+            }else{
+                tableMain += "<input checked style='cursor:pointer' class='checkChild' type='checkbox' id='form_menu_modal_checked_"+ rownumber +"' onclick='setMenu(this ," + dataSelectMenu[rownumber][1] + ")'>";
+            }
+        }else{
+          if(dataSelectMenu[rownumber][5] == 0){ // ISACTIVATED SYS MENU 
+              // (sebenernya display non ini ngga akan tampil kalau di sys menu di nonaktifkan)
+              tableMain += "<input style='display:none;' type='checkbox' id='form_menu_modal_checked_"+ rownumber +"'>";
+          }else{
+              
+              
+              if(dataSelectMenu[rownumber][6] == 1){
+                    tableMain += "<input style='cursor:pointer' class='checkParent' type='checkbox' id='form_menu_modal_checked_"+ rownumber +"' onclick='setMenu(this ," + dataSelectMenu[rownumber][1] + ")'>";
+              }else{
+                    tableMain += "<input style='cursor:pointer' class='checkChild' type='checkbox' id='form_menu_modal_checked_"+ rownumber +"' onclick='setMenu(this ," + dataSelectMenu[rownumber][1] + ")'>";
+              }
+          }
+        }
+        tableMain += "</td>";
+
+
+
+        tableMain += "</tr>";
+
+        menuheader = dataSelectMenu[rownumber][2];
+        rownumber++;
+    }
+}
+document.getElementById("GridView_DataMenu").innerHTML = tableMain;
+
+
+}
+
+//===================================================================================================================
+//======================================================== END : RENDER TABLE =======================================
+//===================================================================================================================
+
+
+
+//===================================================================================================================
+//================================================== BEGIN : SELECT DATA MAIN =======================================
+//===================================================================================================================
+
+function selectData(){
+
+    // PERSIAPAN PENGIRIMAN
+	whattodo = "s801cda9c0408e05b4c359ae69ad22758_1";
+	NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+    // SETTING KIRIMAN
+    kiriman[1] = '';
+
+
+    NN.pleaseWait(true);
+    // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+    NN.callService(kiriman);
+    // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+    // JIKA TIDAK MAKA AKAN TERJADI ERROR
+    renderTable(NN.backService(watermark));
+
+    NN.pleaseWait(false);
+  }
+
+
+function selectDataMenu(ROW){
+
+var id = dataMain[ROW][1];
+$('#button_savegroupmenumodal').attr('onclick', 'confirmationAction("update2",'+ROW+')');
+
+  // PERSIAPAN PENGIRIMAN
+whattodo = "s801cda9c0408e05b4c359ae69ad22758_2";
+NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+// SETTING KIRIMAN
+kiriman[1] = id;
+kiriman[2] = 1;
+
+NN.pleaseWait(true);
+// NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+NN.callService(kiriman);
+// BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+// JIKA TIDAK MAKA AKAN TERJADI ERROR
+renderSelectMenu(NN.backService(watermark));
+
+
+NN.pleaseWait(false);
+}
+//===================================================================================================================
+//================================================== BEGIN : SELECT DATA MAIN =======================================
+//===================================================================================================================
+
+
+//===================================================================================================================
+//================================================== BEGIN : INSERT DATA MAIN =======================================
+//===================================================================================================================
+function insertData(){
+    // CLOSE CONFIRMATION
+	$("#modal_confirmation").modal('hide');
+
+	// PERSIAPAN PENGIRIMAN
+	whattodo = "i801cda9c0408e05b4c359ae69ad22758_1";
+	NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+
+    // SETTING KIRIMAN
+    kiriman[1] = '';
+    kiriman[2] = document.getElementById('form_main_insertupdate_namagroup').value;
+    kiriman[3] = document.getElementById('form_main_insertupdate_keterangan').value;
+
+
+		NN.pleaseWait(true);
+		// NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+		NN.callService(kiriman);
+
+		// BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+		// JIKA TIDAK MAKA AKAN TERJADI ERROR
+		renderTable(NN.backService(watermark));
+		afterInsertUpdate();
+		NN.pleaseWait(false);
+}
+
+//===================================================================================================================
+//================================================== END : INSERT DATA MAIN =========================================
+//===================================================================================================================
+
+
+//===================================================================================================================
+//================================================== BEGIN : UPDATE DATA MAIN =======================================
+//===================================================================================================================
+
+
+function getData(ROW){
+	document.getElementById('form_main_insertupdate_namagroup').value = dataMain[ROW][2];
+	document.getElementById('form_main_insertupdate_keterangan').value = dataMain[ROW][3];
+
+	openForm('update',ROW);
+	NN.scrollTop();
+}
+
+function updateData(ROW){
+
+	$("#modal_confirmation").modal('hide');
+
+	var id = dataMain[ROW][1];
+	// PERSIAPAN PENGIRIMAN
+	whattodo = "u801cda9c0408e05b4c359ae69ad22758_1";
+	NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+    // SETTING KIRIMAN
+    kiriman[1] = id;
+    kiriman[2] = document.getElementById('form_main_insertupdate_namagroup').value;
+    kiriman[3] = document.getElementById('form_main_insertupdate_keterangan').value;
+
+
+		NN.pleaseWait(true);
+    // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+    NN.callService(kiriman);
+    // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+    // JIKA TIDAK MAKA AKAN TERJADI ERROR
+    renderTable(NN.backService(watermark));
+  	afterInsertUpdate();
+  	NN.pleaseWait(false);
+
+}
+
+
+function updateDataMenu(ROW){
+
+$("#modal_datamenu").modal('hide');
+
+var defaultmenu = ['2','3','4','5','6'];
+array_menu_send = defaultmenu.concat(arr_menu_send);
+var id = dataMain[ROW][1];
+// PERSIAPAN PENGIRIMAN
+whattodo = "u801cda9c0408e05b4c359ae69ad22758_2";
+NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+  // SETTING KIRIMAN
+  kiriman[1] = id;
+  kiriman[2] = array_menu_send.toString();
+  
+  NN.pleaseWait(true);
+  // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+  NN.callService(kiriman);
+  // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+  // JIKA TIDAK MAKA AKAN TERJADI ERROR
+  renderTable(NN.backService(watermark));
+  afterInsertUpdate();
+  NN.pleaseWait(false);
+
+}
+
+
+//===================================================================================================================
+//================================================== END : UPDATE DATA MAIN =========================================
+//===================================================================================================================
+
+
+//===================================================================================================================
+//================================================== BEGIN : DELETE DATA MAIN =======================================
+//===================================================================================================================
+function deleteData(ROW){
+	// PERSIAPAN PENGIRIMAN
+
+	$("#modal_confirmation").modal('hide');
+
+	var id = dataMain[ROW][1];
+	var file = dataMain[ROW][7];
+
+
+	whattodo = "d801cda9c0408e05b4c359ae69ad22758_1";
+	NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+    // SETTING KIRIMAN
+    kiriman[1] = id;
+
+
+	NN.pleaseWait(true);
+  // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+  NN.callService(kiriman);
+  // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+  // JIKA TIDAK MAKA AKAN TERJADI ERROR
+  renderTable(NN.backService(watermark));
+	$('#alert_success').slideDown('fast').fadeTo(3000, 500).slideUp('fast', function () { $('#alert_success').hide(); });
+	NN.scrollTop();
+	NN.pleaseWait(false);
+}
+//===================================================================================================================
+//================================================== END : DELETE DATA MAIN =========================================
+//===================================================================================================================
+
+
+
+
+//===================================================================================================================
+//======================================= BEGIN : FUNCTION OPEN MODAL GET DATA ======================================
+//===================================================================================================================
+
+
+function openDataMenu(ROW) {
+	NN.pleaseWait(true);
+	selectDataMenu(ROW);
+	NN.pleaseWait(false);
+	document.getElementById('form_menu_modal_namagroup').value = dataMain[ROW][2]
+	$('#modal_datamenu').modal('show');
+}
+
+function clickCheck(EL , MENU) {
+	// EL = $('#'+EL.id).children('td').children('input')[0];
+	// if(EL.checked == true){
+	// 		EL.checked = false;
+	// }else{
+	// 		EL.checked = true;
+	// }
+	// setMenu(EL , MENU);
+}
+
+
+function setMenu(EL , MENU) {
+    index = arr_menu_send.indexOf(MENU+"");
+    if (EL.checked) {
+        if (index == -1) { // JIKA BELUM ADA MAKA HARUS DI PUSH
+            arr_menu_send.push(MENU.toString());
+        }
+    }
+    else {
+        arr_menu_send.splice(index, 1);
+    }
+    
+    
+    // checkedParentChild(EL);
+}
+
+
+function checkedParentChild(EL){
+    // console.log(EL.id);
+    // console.log($('#'+EL.id).attr('level'));
+    // console.log($('#'+EL.id).attr('id_menu'));
+    
+    // var id_menu = $('#'+EL.id).attr('id_menu');
+    // var level = $('#'+EL.id).attr('level');
+    
+    // if(level == 1){
+    //     alert('masuk sini');
+        
+    //     $('#'+EL.id).attr('id_menu').prop('checked',this.checked);
+    // }
+    
+    
+    // $(this).next().find('input[type=checkbox]').prop('checked',this.checked);
+    // // go up the hierarchy - and check/uncheck depending on number of children checked/unchecked
+    // $(this).parents('ul').prev('input[type=checkbox]').prop('checked',function(){
+    //     return $(this).next().find(':checked').length;
+    // });
+}
+
+//===================================================================================================================
+//======================================= END : FUNCTION OPEN MODAL GET DATA ========================================
+//===================================================================================================================
+
+
+
+//===================================================================================================================
+//======================================= BEGIN : FUNCTION ADD OTHER  ===============================================
+//===================================================================================================================
+
+function confirmationAction(AKSI,ROW){
+	if(AKSI == 'insert'){ // KETIKA TOMMBOL SAVE SAAT MENYIMPAN DATA DI KLIK
+		if(validasiForm() == false){
+			return false;
+		}
+		insertData();
+		document.getElementById('alert-text-success').innerHTML = 'Data Berhasil di tambah';
+	}else if(AKSI == 'update'){ // KETIKA TOMMBOL SAVE SAAT EDIT DATA DI KLIK
+		if(validasiForm() == false){
+			return false;
+		}
+		// UNTUK MENGUBAH FUNCTION ONCLICK MENJADI EDIT DATA
+		$('#button_aply').attr('onclick', 'updateData('+ROW+')');
+		document.getElementById('text-confirmation').innerHTML = 'LANJUTKAN UBAH DATA ?';
+		document.getElementById('alert-text-success').innerHTML = 'Data Berhasil di ubah';
+	}else if(AKSI == 'update2'){ // KETIKA TOMMBOL SAVE SAAT EDIT DATA DI KLIK
+		// UNTUK MENGUBAH FUNCTION ONCLICK MENJADI EDIT DATA
+		$('#button_aply').attr('onclick', 'updateDataMenu('+ROW+')');
+		document.getElementById('text-confirmation').innerHTML = 'LANJUTKAN UBAH DATA ?';
+		document.getElementById('alert-text-success').innerHTML = 'Data Berhasil di ubah';
+	}else if(AKSI == 'delete'){ // KETIKA TOMMBOL DELETE DI KLIK
+		// UNTUK MENGUBAH FUNCTION ONCLICK MENJADI EDIT DATA
+		$('#button_aply').attr('onclick', 'deleteData('+ROW+')');
+		document.getElementById('text-confirmation').innerHTML = 'LANJUTKAN HAPUS DATA ?';
+		document.getElementById('alert-text-success').innerHTML = 'Data Berhasil di hapus';
+	}else if(AKSI == 'close'){
+		// UNTUK MENGUBAH FUNCTION ONCLICK MENJADI CLOSE DATA
+		$('#button_aply').attr('onclick', 'closeForm()');
+		document.getElementById('text-confirmation').innerHTML = 'FIELD YANG SUDAH DI ISI AKAN TERHAPUS, LANJUTKAN TUTUP FORM ?';
+
+	}
+
+    if(AKSI != 'insert'){
+	    $("#modal_confirmation").modal('show');
+    }
+
+}
+
+function validasiForm(){
+	var isValid = true;
+
+	if(document.getElementById('form_main_insertupdate_namagroup').value == ""){
+		document.getElementById('form_main_insertupdate_namagroup').style.background = NN.colorEmpty();
+		isValid = false;
+	}else{
+		document.getElementById('form_main_insertupdate_namagroup').style.background = NN.colorDefault();
+	}
+
+	if(document.getElementById('form_main_insertupdate_keterangan').value == ""){
+		document.getElementById('form_main_insertupdate_keterangan').style.background = NN.colorEmpty();
+		isValid = false;
+	}else{
+		document.getElementById('form_main_insertupdate_keterangan').style.background = NN.colorDefault();
+	}
+
+	if(isValid == false){
+	    $('#alert_warning').slideDown('fast').fadeTo(3000, 500).slideUp('fast', function () { $('#alert_warning').hide(); });
+		document.getElementById('alert-text-warning').innerHTML = 'Masih ada yang belum di isi.';
+		NN.scrollTop();
+		return isValid;
+	}
+}
+
+function clearForm(){
+	$('.isclear').val('');
+	$('.isclear').css({"background-color": NN.colorDefault()});
+	$('.image-preview-clear').click();
+}
+
+function openForm(ISOPEN,ROW){
+	if (ISOPEN == 'insert'){
+		document.getElementById('nameformpanel').innerHTML = 'TAMBAH DATA';
+		clearForm();
+		// UNTUK MENGUBAH FUNCTION ONCLICK MENJADI INSERT DATA
+		$('#button_save').attr('onclick', 'confirmationAction("insert")');
+	    $("#box_form_insertupdate").slideDown("fast");
+
+	}else{
+		document.getElementById('nameformpanel').innerHTML = 'UBAH DATA';
+		// UNTUK MENGUBAH FUNCTION ONCLICK MENJADI EDIT DATA
+		$('#button_save').attr('onclick', 'confirmationAction("update",'+ROW+')');
+	    $("#box_form_insertupdate").slideDown("fast");
+	}
+	NN.scrollTop();
+}
+
+function closeForm(){
+	$("#modal_confirmation").modal('hide');
+	document.getElementById('nameformpanel').innerHTML = '';
+	$("#box_form_insertupdate").slideUp("fast");
+	clearForm();
+}
+
+function afterInsertUpdate(){
+	$('#alert_success').slideDown('fast').fadeTo(3000, 500).slideUp('fast', function () { $('#alert_success').hide(); });
+  closeForm();
+  
+	selectDataSidebar();
+}
+
+function dataTablef(){
+    dataTables = $('#example1').DataTable( {
+    lengthChange: false,
+    //buttons: ['excel', 'pdf', 'colvis']
+    buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fa fa-file-excel-o"></i> Excel',
+                    //titleAttr: 'Export to Excel',
+                    title: 'Data_User',
+                    exportOptions: {
+                          //columns: [ 0, 1, 2, 3, 4, 5 ], setting statis kolom yang akan di export
+                          //columns: [':not(:last-child)'], hanya untuk kolom terakhir yang tidak di export
+                          columns: ':visible:not(.not-export-col)', // sesui show hide kolom
+                          modifier : {
+                          // DataTables core
+                          order : 'applied',  // 'current', 'applied', 'index',  'original'
+                          page : 'current',      // 'all',     'current'
+                          search : 'applied'     // 'none',    'applied', 'removed'
+                        }
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="fa fa-file-pdf-o"></i> PDF',
+                    title: 'Data_User',
+                    exportOptions: {
+                          columns: ':visible:not(.not-export-col)',
+                          modifier : {
+                          order : 'applied',
+                          page : 'current',
+                          search : 'applied'
+                        }
+                    }
+                },
+                {
+                  extend: 'print',
+                  text: '<i class="fa fa-print"></i> Print',
+                  title: 'Data_User',
+                  exportOptions: {
+                        columns: ':visible:not(.not-export-col)',
+                        modifier : {
+                        order : 'applied',
+                        page : 'current',
+                        search : 'applied'
+                      }
+                  }
+                },
+                {
+                  extend: 'colvis',
+                  text: '<i class="fa fa-eye"> Lihat Kolom</i>',
+                  columns: ':gt(0)', // list awal kolom tidak tampil
+                  //columns: ':not(.noVis)' // list yang menggunkan class noVis tidak tampil
+                }
+            ],
+            columnDefs: [
+              {
+                 // membuat class pada kolom awal dan akhir
+                  targets: [0, -1],
+                  className: 'noVis'
+              },
+              {
+                 // kolom akhir tidak bisa di ordering
+                  targets: [-1],
+                  "orderable": false
+              },
+              {
+                  // kolom 6 di hide saat awal default
+                  // targets: [5],
+                  // "bVisible": false
+              }
+            ],
+
+
+    });
+    dataTables.buttons().container().appendTo('#example1_wrapper .col-sm-6:eq(0)');
+  }
+
+//===================================================================================================================
+//======================================= END : FUNCTION ADD OTHER  =================================================
+//===================================================================================================================
+
+</script>
+
+
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <!-- <h1>
+      OLAH DATA PENGGUNA
+      <small>rincian pengguna</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><a href="#">Tables</a></li>
+      <li class="active">Data tables</li>
+    </ol> -->
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+
+
+		<!-- //======================= BEGIN : ALERT AND NOTIFICATION =============================================== -->
+		<div class="row">
+			<div class="col-xs-12">
+
+
+				<div class="callout callout-success" id="alert_success" style="display:none;">
+						<h4><i class="icon fa fa-check"></i> Berhasil!</h4>
+	          <p id='alert-text-success'></p>
+        </div>
+				<div class="callout callout-warning" id="alert_warning" style="display:none;">
+						<h4><i class="icon fa fa-warning"></i> Peringatan!</h4>
+	          <p id='alert-text-warning'></p>
+        </div>
+				<div class="callout callout-info" id="alert_info" style="display:none;">
+						<h4><i class="icon fa fa-info"></i> Pemberitahuan!</h4>
+	          <p id='alert-text-info'></p>
+        </div>
+				<div class="callout callout-danger" id="alert_danger" style="display:none;">
+						<h4><i class="icon fa fa-ban"></i> Bahaya!</h4>
+	          <p id='alert-text-danger'></p>
+        </div>
+
+
+			</div>
+		</div>
+		<!-- //======================= END : ALERT AND NOTIFICATION  ================================================ -->
+
+
+
+    <div class="row">
+      <div class="col-xs-12">
+
+
+        <!-- form box -->
+        <div class="box box-primary" id="box_form_insertupdate" style="display:none;">
+          <div class="box-header with-border">
+            <h3 class="box-title" id="nameformpanel"></h3>
+
+            <div class="box-tools pull-right">
+              <button type="button" class="btn btn-box-tool" data-widget="collapse" id="buttoncloseform_insertupdate" style="display:none"><i class="fa fa-plus"></i></button>
+              <!-- <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button> -->
+              <!-- <button type="button" class="btn btn-box-tool" data-widget="remove" id="buttoncloseform_insertupdate"><i class="fa fa-remove"></i></button> -->
+            </div>
+          </div>
+          <!-- /.box-header -->
+          <div class="box-body">
+						<div class="row">
+              <!-- /.col -->
+              <div class="col-md-6">
+
+                <div class="form-group">
+                  <label>NAMA GROUP</label>
+                  <input class="form-control isclear" type="text" id="form_main_insertupdate_namagroup">
+                </div>
+
+              </div>
+              <!-- /.col -->
+              <div class="col-md-6">
+
+                <div class="form-group">
+                  <label>KETERANGAN</label>
+                  <textarea class="form-control isclear" rows="5" id="form_main_insertupdate_keterangan"></textarea>
+              	</div>
+
+              </div>
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- /.box-body -->
+          <div class="box-footer">
+            *form ini digunakan untuk tambah atau edit data
+            <div class="btn-group pull-right">
+              <button type="button" class="btn btn-primary btn-sm" id="button_save"><i class="fa fa-fw fa-save"></i> SIMPAN</button>
+	            <button type="button" class="btn btn-default btn-sm" onclick="confirmationAction('close');"><i class="fa fa-fw fa-close"></i> TUTUP</button>
+            </div>
+          </div>
+        </div>
+        <!-- form box -->
+
+				<!-- table box -->
+        <div class="box box-primary">
+          <div class="box-header with-border">
+            <!-- <h3 class="box-title">DATA OBAT</h3> -->
+						<button type="button" onclick="openForm('insert');" class="btn btn-primary btn-sm"><i class="fa fa-fw fa-plus-square"></i> Tambah</button>
+						<button type="button" onclick="selectData();" class="btn btn-primary btn-sm"><i class="fa fa-fw fa-refresh"></i> Refresh</button>
+						<div class="box-tools pull-right">
+              <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+              <!-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button> -->
+            </div>
+          </div>
+          <div class="box-header">
+            <!-- <h3 class="box-title">Data Table With Full Features</h3> -->
+          </div>
+          <!-- /.box-header -->
+          <div class="box-body">
+						<table id="example1" class="table table-bordered table-striped table-hover">
+              <thead>
+              <tr>
+                <th class="numberwidth">NO</th>
+                <th>NAMA GROUP</th>
+                <th>KETERANGAN</th>
+                <th style="width:100px;">AKSI</th>
+              </tr>
+              </thead>
+              <tbody id="GridView_DataMain"></tbody>
+              <tfoot>
+              <tr>
+                <th class="numberwidth">NO</th>
+                <th>NAMA GROUP</th>
+                <th>KETERANGAN</th>
+                <th style="width:100px;">AKSI</th>
+              </tr>
+              </tfoot>
+            </table>
+          </div>
+          <!-- /.box-body -->
+        </div>
+        <!-- table box -->
+
+
+
+      </div>
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+  </section>
+  <!-- /.content -->
+
+
+
+
+
+<!-- ============================ BEGIN : MODAL DATA MENU ==================================================== -->
+<div class="modal modal-default fade" id="modal_datamenu">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">DATA MENU</h4>
+      </div>
+      <div class="modal-body">
+
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group">
+		          <label>NAMA GROUP</label>
+		          <input class="form-control" id="form_menu_modal_namagroup" type="text" disabled>
+		        </div>
+	        </div>
+					<div class="col-md-6">
+	        </div>
+        </div>
+
+				<table id="example2" class="table table-bordered table-striped table-hover">
+          <thead>
+							<tr>
+									<th class="numberwidth">NO</th>
+									<th>MENU</th>
+									<th>SUBMENU</th>
+									<th class="actionwidth">SHOW</th>
+							</tr>
+          </thead>
+          <tbody id="GridView_DataMenu"></tbody>
+      </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-sm" id="button_savegroupmenumodal">SAVE</button>
+        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">CLOSE</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- ============================ END : MODAL DATA MENU ====================================================== -->
+
+
+<!-- ============================ BEGIN : MODAL CONFIRMATION ==================================================== -->
+<div class="modal modal-default fade" id="modal_confirmation">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">KONFIRMASI</h4>
+      </div>
+      <div class="modal-body">
+        <p id="text-confirmation"></p>
+      </div>
+      <div class="modal-footer">
+				<button type="button" class="btn btn-default pull-left btn-sm" id="button_aply">YA</button>
+        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">TIDAK</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- ============================ END : MODAL CONFIRMATION ====================================================== -->
+
+
+
+
+<!-- /.content-wrapper -->
+
+<!-- Select2 -->
+<script src="frontend/bower_components/select2/dist/js/select2.full.min.js"></script>
+
+<!-- Bootstrap 3.3.7 -->
+<script src="frontend/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="frontend/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="frontend/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="frontend/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="frontend/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="frontend/dist/js/demo.js"></script>
+<!-- page script -->
+
+<!-- kebutuhan dataTable -->
+<script src="frontend/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/dataTables.buttons.min.js"></script>
+<script src="frontend/bower_components/datatables.net-bs/js/buttons.bootstrap.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.flash.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/jszip.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/pdfmake.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/vfs_fonts.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.html5.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.print.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.colVis.min.js"></script>
+
+<script>
+
+
+//===================================================================================================================
+//============================= BEGIN : HALAMAN LOAD SETELAH SEMUA DOM HTML SELESAI =================================
+//===================================================================================================================
+	$(document).ready(function(){
+    dataTablef();
+		selectData();
+
+	});
+
+
+  //===================================================================================================================
+  //============================= END : HALAMAN LOAD SETELAH SEMUA DOM HTML SELESAI ===================================
+  //===================================================================================================================
+
+
+
+
+</script>
