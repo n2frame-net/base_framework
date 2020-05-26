@@ -95,3 +95,8 @@ input:checked + .slider:before {
 .align-integer{
   text-align: right;
 }
+
+.login-box, .register-box {
+  width: 360px;
+  margin: 0% auto !important;
+}

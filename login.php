@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="frontend/dist/css/AdminLTE.min.css">
   <!-- iCheck -->
   <link rel="stylesheet" href="frontend/plugins/iCheck/square/blue.css">
+  <link rel="stylesheet" href="frontend/lib/css/NNstyle.css">
 
   <!-- CALL FRAMWORK GLOBAL -->
   <script src="frontend/lib/js/NNFrameWork.js"></script>

@@ -1,0 +1,799 @@
+<!--
+    ==================================== BEGIN: INFO FILES ======================================
+    VIEW       : view_sys_file.html
+    CONTROLLER : controller_sys_file.nfh.php
+    SP	       : sp_sys_file
+    MODEL      : NNclass.php
+    ==================================== END: INFO FILES ========================================
+ -->
+
+
+<!-- ===================================================================================================================================
+===================================================== BEGIN : SCRIPT JAVASCRIPT ========================================================
+==================================================================================================================================== -->
+<script type="text/javascript">
+
+    //==================================================================================================================//
+    //========================================== BEGIN : DEKLARASI VARIABLE GLOBAL =====================================//
+
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX BEGIN : JANGAN DI UBAH ! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    watermark = 'NPL'; // JIKA DI UBAH AKAN ADA ERROR
+    controller = urlparamsplit[0];
+    namesp = urlparamsplit[1];
+    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX END : JANGAN DI UBAH ! XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    // DISESUIKAN DENGAN JUMLAH PARAMETER YANG AKAN DITAMPUNG PADA PARAMETER STORE PROCEDURE
+    // JUMLAH MAXIMAL BERADA PADA SERVICEGATEWAY $max_param
+    // AKAN TERJADI ERROR APABILA JUMLAH YANG DI ISI DISINI TIDAK SESUAI JUMLAH PENAMPUNG DI SP
+    var max_param_sp = 10;
+
+
+    // UNTUK RENDER DATA ARRAY
+    var dataMain;
+
+    // UNTUK VARIABLE DATATABEL
+    var dataTables;
+    var nameFileDataExport = "Pendaftar Laki - laki"
+    //======================================= END : DEKLARASI VARIABLE GLOBAL ==========================================//
+    //==================================================================================================================//
+
+
+    //===================================================================================================================
+    //======================================= BEGIN : RENDER TABLE ======================================================
+    //===================================================================================================================
+
+    function renderTable(returnData, ROW) {
+
+        // CLEAR TABLE RENDER
+        dataTables.clear().draw();
+
+        var obj = JSON.parse(returnData);
+
+        var rownumber = 0;
+        var tableMain = "";
+        var i = 1;
+        var p = obj.data;
+        // apabila balikan data kosong maka masuk if ini
+        if (p[rownumber] == undefined) {
+            dataTables.rows.add($(tableMain)).draw();
+            return;
+        }
+        var totalfield = Object.keys(p[rownumber]).length;
+
+        dataMain = new Array();
+        for (var key in p) {
+            if (p.hasOwnProperty(key)) {
+
+                // deklarasi array dua dimensi
+                dataMain.push(new Array())
+
+                // looping field sebanyak balikan dari controller
+                for (l = 1; l <= totalfield; l++) {
+                    dataMain[rownumber][l] = p[key]['N' + l];
+                }
+
+                tableMain += "<tr id = \"" + "RowMain" + i + "\"" + ">";
+
+                tableMain += "<td class='text-center'>" + (i++) + "</td>";
+
+                tableMain += "<td>" + dataMain[rownumber][2] + "</td>";
+                tableMain += "<td>" + dataMain[rownumber][4] + "</td>";
+                tableMain += "<td>" + dataMain[rownumber][5] + "</td>";
+                tableMain += "<td>" + dataMain[rownumber][6] + "</td>";
+                tableMain += "<td>" + dataMain[rownumber][7] + "</td>";
+                tableMain += "<td>" + dataMain[rownumber][8] + "</td>";
+                tableMain += "<td>" + dataMain[rownumber][9] + "</td>";
+
+                tableMain += "<td align='center'>";
+
+                // if (dataMain[rownumber][7] == 1) {
+                //     tableMain += "<i style='color:#1d9d74' class='fa fa-check-circle' aria-hidden='true'></i>&nbsp;&nbsp;";
+                // } else {
+                //     tableMain += "<i style='color:#e74c3c' class='fa fa-times-circle' aria-hidden='true'></i>&nbsp;&nbsp;";
+                // }
+                // tableMain += "<button type='button' class='btn btn-xs btn-default' onclick='getData(" + rownumber + ")' data-toggle='tooltip' data-placement='top' data-original-title='Ubah'>";
+                // tableMain += "<span class='glyphicon glyphicon-pencil'></span>";
+                // tableMain += "</button>&nbsp;";
+                // tableMain += "<button type='button' class='remove-news btn btn-xs btn-default' onclick='confirmationAction(\"delete\"," + rownumber + ")' data-toggle='tooltip' data-placement='top' data-original-title='Hapus'>";
+                // tableMain += "<span class='glyphicon glyphicon-trash'></span>";
+                // tableMain += "</button>";
+
+                if (ROW == undefined) {
+                    tableMain += "<button type='button' class='remove-news btn btn-xs btn-default' onclick='selectData(" + rownumber + ")' data-toggle='tooltip' data-placement='top' data-original-title='Hapus'>";
+                    tableMain += "<span class='fa fa-cog'></span>";
+                    tableMain += "</button>";
+
+                }
+
+
+                tableMain += "</td>";
+
+                tableMain += "</tr>";
+
+                rownumber++;
+            }
+        }
+        //document.getElementById("GridView_DataMain").innerHTML = tableMain;
+        dataTables.rows.add($(tableMain)).draw();
+    }
+
+
+
+    //===================================================================================================================
+    //======================================================== END : RENDER TABLE =======================================
+    //===================================================================================================================
+
+
+
+    //===================================================================================================================
+    //================================================== BEGIN : SELECT DATA MAIN =======================================
+    //===================================================================================================================
+
+    function selectData(ROW) {
+        console.log(ROW)
+
+        // PERSIAPAN PENGIRIMAN
+
+        whattodo = "s801cda9c0408e05b4c359ae69ad22758_1";
+        if (ROW != undefined) {
+            whattodo = "g801cda9c0408e05b4c359ae69ad22758_1";
+        }
+
+        NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+        // SETTING KIRIMAN
+
+        kiriman[1] = '';
+        if (ROW != undefined) {
+            kiriman[1] = dataMain[ROW][10];
+            kiriman[2] = dataMain[ROW][14];
+        }
+
+
+
+        NN.pleaseWait(true);
+        // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+        NN.callService(kiriman);
+        // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+        // JIKA TIDAK MAKA AKAN TERJADI ERROR
+        renderTable(NN.backService(watermark), ROW);
+
+        NN.pleaseWait(false);
+    }
+
+
+    //===================================================================================================================
+    //================================================== BEGIN : SELECT DATA MAIN =======================================
+    //===================================================================================================================
+
+
+    //===================================================================================================================
+    //================================================== BEGIN : INSERT DATA MAIN =======================================
+    //===================================================================================================================
+    function insertData() {
+        // CLOSE CONFIRMATION
+        $("#modal_confirmation").modal('hide');
+
+        // PERSIAPAN PENGIRIMAN
+        whattodo = "i801cda9c0408e05b4c359ae69ad22758_1";
+        NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+
+        // SETTING KIRIMAN
+        kiriman[1] = '';
+        kiriman[2] = document.getElementById('form_main_insertupdate_namaview').value;
+        kiriman[3] = document.getElementById('form_main_insertupdate_namakontroler').value;
+        kiriman[4] = document.getElementById('form_main_insertupdate_namasp').value;
+        kiriman[5] = document.getElementById('form_main_insertupdate_keterangan').value;
+        kiriman[6] = (document.getElementById('form_main_insertupdate_isactivated').checked == true ? 1 : 0);
+        kiriman[7] = document.getElementById('form_main_insertupdate_isbofo').value;
+
+        NN.pleaseWait(true);
+        // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+        NN.callService(kiriman);
+
+        // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+        // JIKA TIDAK MAKA AKAN TERJADI ERROR
+        renderTable(NN.backService(watermark));
+        afterInsertUpdate();
+        NN.pleaseWait(false);
+    }
+
+    //===================================================================================================================
+    //================================================== END : INSERT DATA MAIN =========================================
+    //===================================================================================================================
+
+
+    //===================================================================================================================
+    //================================================== BEGIN : UPDATE DATA MAIN =======================================
+    //===================================================================================================================
+
+
+    function getData(ROW) {
+        document.getElementById('form_main_insertupdate_namaview').value = dataMain[ROW][2];
+        document.getElementById('form_main_insertupdate_namakontroler').value = dataMain[ROW][3];
+        document.getElementById('form_main_insertupdate_namasp').value = dataMain[ROW][4];
+        document.getElementById('form_main_insertupdate_keterangan').value = dataMain[ROW][6];
+
+        if (dataMain[ROW][7] == 1) {
+            document.getElementById('form_main_insertupdate_isactivated').checked = true;
+        } else {
+            document.getElementById('form_main_insertupdate_isactivated').checked = false;
+        }
+        document.getElementById('form_main_insertupdate_isbofo').value = dataMain[ROW][9];
+
+        openForm('update', ROW);
+        NN.scrollTop();
+    }
+
+    function updateData(ROW) {
+
+        $("#modal_confirmation").modal('hide');
+
+        var id = dataMain[ROW][1];
+        // PERSIAPAN PENGIRIMAN
+        whattodo = "u801cda9c0408e05b4c359ae69ad22758_1";
+        NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+        // SETTING KIRIMAN
+        kiriman[1] = id;
+        kiriman[2] = document.getElementById('form_main_insertupdate_namaview').value;
+        kiriman[3] = document.getElementById('form_main_insertupdate_namakontroler').value;
+        kiriman[4] = document.getElementById('form_main_insertupdate_namasp').value;
+        kiriman[5] = document.getElementById('form_main_insertupdate_keterangan').value;
+        kiriman[6] = (document.getElementById('form_main_insertupdate_isactivated').checked == true ? 1 : 0);
+        kiriman[7] = document.getElementById('form_main_insertupdate_isbofo').value;
+
+
+        NN.pleaseWait(true);
+        // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+        NN.callService(kiriman);
+        // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+        // JIKA TIDAK MAKA AKAN TERJADI ERROR
+        renderTable(NN.backService(watermark));
+        afterInsertUpdate();
+        NN.pleaseWait(false);
+
+    }
+    //===================================================================================================================
+    //================================================== END : UPDATE DATA MAIN =========================================
+    //===================================================================================================================
+
+
+    //===================================================================================================================
+    //================================================== BEGIN : DELETE DATA MAIN =======================================
+    //===================================================================================================================
+    function deleteData(ROW) {
+        // PERSIAPAN PENGIRIMAN
+
+        $("#modal_confirmation").modal('hide');
+
+        var id = dataMain[ROW][1];
+        var file = dataMain[ROW][7];
+
+
+        whattodo = "d801cda9c0408e05b4c359ae69ad22758_1";
+        NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+
+        // SETTING KIRIMAN
+        kiriman[1] = id;
+
+
+        NN.pleaseWait(true);
+        // NN.callService(kiriman) = MENGIRIM DATA KIRIMAN KE SERVICE
+        NN.callService(kiriman);
+        // BALIKAN DARI SERVICE (WAJIB MENGUGUNAKAN FUNCTION  --> NN.backService(watermark))
+        // JIKA TIDAK MAKA AKAN TERJADI ERROR
+        renderTable(NN.backService(watermark));
+        $('#alert_success').slideDown('fast').fadeTo(3000, 500).slideUp('fast', function () { $('#alert_success').hide(); });
+        NN.scrollTop();
+        NN.pleaseWait(false);
+    }
+    //===================================================================================================================
+    //================================================== END : DELETE DATA MAIN =========================================
+    //===================================================================================================================
+
+
+
+
+    //===================================================================================================================
+    //======================================= BEGIN : FUNCTION OPEN MODAL GET DATA ======================================
+    //===================================================================================================================
+
+    // akan di isi modal
+
+    //===================================================================================================================
+    //======================================= END : FUNCTION OPEN MODAL GET DATA ========================================
+    //===================================================================================================================
+
+
+
+    //===================================================================================================================
+    //======================================= BEGIN : FUNCTION ADD OTHER  ===============================================
+    //===================================================================================================================
+
+    function confirmationAction(AKSI, ROW) {
+        if (AKSI == 'insert') { // KETIKA TOMMBOL SAVE SAAT MENYIMPAN DATA DI KLIK
+            if (validasiForm() == false) {
+                return false;
+            }
+            insertData();
+            document.getElementById('alert-text-success').innerHTML = 'Data Berhasil di tambah';
+        } else if (AKSI == 'update') { // KETIKA TOMMBOL SAVE SAAT EDIT DATA DI KLIK
+            if (validasiForm() == false) {
+                return false;
+            }
+            // UNTUK MENGUBAH FUNCTION ONCLICK MENJADI EDIT DATA
+            $('#button_aply').attr('onclick', 'updateData(' + ROW + ')');
+            document.getElementById('text-confirmation').innerHTML = 'LANJUTKAN UBAH DATA ?';
+            document.getElementById('alert-text-success').innerHTML = 'Data Berhasil di ubah';
+        } else if (AKSI == 'delete') { // KETIKA TOMMBOL DELETE DI KLIK
+            // UNTUK MENGUBAH FUNCTION ONCLICK MENJADI EDIT DATA
+            $('#button_aply').attr('onclick', 'deleteData(' + ROW + ')');
+            document.getElementById('text-confirmation').innerHTML = 'LANJUTKAN HAPUS DATA ?';
+            document.getElementById('alert-text-success').innerHTML = 'Data Berhasil di hapus';
+        } else if (AKSI == 'close') {
+            // UNTUK MENGUBAH FUNCTION ONCLICK MENJADI CLOSE DATA
+            $('#button_aply').attr('onclick', 'closeForm()');
+            document.getElementById('text-confirmation').innerHTML = 'FIELD YANG SUDAH DI ISI AKAN TERHAPUS, LANJUTKAN TUTUP FORM ?';
+
+        }
+
+        if (AKSI != 'insert') {
+            $("#modal_confirmation").modal('show');
+        }
+
+    }
+
+    function validasiForm() {
+        var isValid = true;
+
+        if (document.getElementById('form_main_insertupdate_namaview').value == "") {
+            document.getElementById('form_main_insertupdate_namaview').style.background = NN.colorEmpty();
+            isValid = false;
+        } else {
+            document.getElementById('form_main_insertupdate_namaview').style.background = NN.colorDefault();
+        }
+
+        if (document.getElementById('form_main_insertupdate_namakontroler').value == "") {
+            document.getElementById('form_main_insertupdate_namakontroler').style.background = NN.colorEmpty();
+            isValid = false;
+        } else {
+            document.getElementById('form_main_insertupdate_namakontroler').style.background = NN.colorDefault();
+        }
+
+        if (document.getElementById('form_main_insertupdate_namasp').value == "") {
+            document.getElementById('form_main_insertupdate_namasp').style.background = NN.colorEmpty();
+            isValid = false;
+        } else {
+            document.getElementById('form_main_insertupdate_namasp').style.background = NN.colorDefault();
+        }
+
+        if (document.getElementById('form_main_insertupdate_keterangan').value == "") {
+            document.getElementById('form_main_insertupdate_keterangan').style.background = NN.colorEmpty();
+            isValid = false;
+        } else {
+            document.getElementById('form_main_insertupdate_keterangan').style.background = NN.colorDefault();
+        }
+
+        if (document.getElementById('form_main_insertupdate_isbofo').value == "") {
+            document.getElementById('form_main_insertupdate_isbofo').style.background = NN.colorEmpty();
+            isValid = false;
+        } else {
+            document.getElementById('form_main_insertupdate_isbofo').style.background = NN.colorDefault();
+        }
+
+        if (isValid == false) {
+            $('#alert_warning').slideDown('fast').fadeTo(3000, 500).slideUp('fast', function () { $('#alert_warning').hide(); });
+            document.getElementById('alert-text-warning').innerHTML = 'Masih ada yang belum di isi.';
+            NN.scrollTop();
+            return isValid;
+        }
+    }
+
+    function clearForm() {
+        $('.isclear').val('');
+        $('.isclear').css({ "background-color": NN.colorDefault() });
+        $('.image-preview-clear').click();
+    }
+
+    function openForm(ISOPEN, ROW) {
+        if (ISOPEN == 'insert') {
+            document.getElementById('nameformpanel').innerHTML = 'TAMBAH DATA';
+            clearForm();
+            // UNTUK MENGUBAH FUNCTION ONCLICK MENJADI INSERT DATA
+            $('#button_save').attr('onclick', 'confirmationAction("insert")');
+            $("#box_form_insertupdate").slideDown("fast");
+
+        } else {
+            document.getElementById('nameformpanel').innerHTML = 'UBAH DATA';
+            // UNTUK MENGUBAH FUNCTION ONCLICK MENJADI EDIT DATA
+            $('#button_save').attr('onclick', 'confirmationAction("update",' + ROW + ')');
+            $("#box_form_insertupdate").slideDown("fast");
+        }
+        NN.scrollTop();
+    }
+
+    function closeForm() {
+        $("#modal_confirmation").modal('hide');
+        document.getElementById('nameformpanel').innerHTML = '';
+        $("#box_form_insertupdate").slideUp("fast");
+        clearForm();
+    }
+
+    function afterInsertUpdate() {
+        $('#alert_success').slideDown('fast').fadeTo(3000, 500).slideUp('fast', function () { $('#alert_success').hide(); });
+        closeForm();
+    }
+
+    function dataTablef() {
+        dataTables = $('#example1').DataTable({
+            lengthChange: false,
+            pageLength: 100,
+            //buttons: ['excel', 'pdf', 'colvis']
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fa fa-file-excel-o"></i> Excel',
+                    //titleAttr: 'Export to Excel',
+                    title: nameFileDataExport,
+                    exportOptions: {
+                        //columns: [ 0, 1, 2, 3, 4, 5 ], setting statis kolom yang akan di export
+                        //columns: [':not(:last-child)'], hanya untuk kolom terakhir yang tidak di export
+                        columns: ':visible:not(.not-export-col)', // sesui show hide kolom
+                        modifier: {
+                            // DataTables core
+                            order: 'applied',  // 'current', 'applied', 'index',  'original'
+                            page: 'current',      // 'all',     'current'
+                            search: 'applied'     // 'none',    'applied', 'removed'
+                        }
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="fa fa-file-pdf-o"></i> PDF',
+                    title: nameFileDataExport,
+                    exportOptions: {
+                        columns: ':visible:not(.not-export-col)',
+                        modifier: {
+                            order: 'applied',
+                            page: 'current',
+                            search: 'applied'
+                        }
+                    }
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fa fa-print"></i> Print',
+                    title: nameFileDataExport,
+                    exportOptions: {
+                        columns: ':visible:not(.not-export-col)',
+                        modifier: {
+                            order: 'applied',
+                            page: 'current',
+                            search: 'applied'
+                        }
+                    }
+                },
+                {
+                    extend: 'colvis',
+                    text: '<i class="fa fa-eye"> Lihat Kolom</i>',
+                    columns: ':gt(0)', // list awal kolom tidak tampil
+                    //columns: ':not(.noVis)' // list yang menggunkan class noVis tidak tampil
+                }
+            ],
+            columnDefs: [
+                {
+                    // membuat class pada kolom awal dan akhir
+                    targets: [0, -1],
+                    className: 'noVis'
+                },
+                {
+                    // kolom akhir tidak bisa di ordering
+                    targets: [-1],
+                    "orderable": false
+                },
+                {
+                    // kolom 6 di hide saat awal default
+                    targets: [7],
+                    "bVisible": false
+                },
+                {
+                    // targets: 6,
+                    // width: 80
+                }
+            ],
+            // fixedColumns: true,
+            // scrollY:        "400px",
+            // scrollX:        true,
+            // scrollCollapse: true,
+
+
+        });
+        dataTables.buttons().container().appendTo('#example1_wrapper .col-sm-6:eq(0)');
+    }
+
+    //===================================================================================================================
+    //======================================= END : FUNCTION ADD OTHER  =================================================
+    //===================================================================================================================
+
+</script>
+
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <!-- <h1>
+          OLAH DATA PENGGUNA
+          <small>rincian pengguna</small>
+        </h1>
+        <ol class="breadcrumb">
+          <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+          <li><a href="#">Tables</a></li>
+          <li class="active">Data tables</li>
+        </ol> -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+
+    <!-- //======================= BEGIN : ALERT AND NOTIFICATION =============================================== -->
+    <div class="row">
+        <div class="col-xs-12">
+
+
+            <div class="callout callout-success" id="alert_success" style="display:none;">
+                <h4><i class="icon fa fa-check"></i> Berhasil!</h4>
+                <p id='alert-text-success'></p>
+            </div>
+            <div class="callout callout-warning" id="alert_warning" style="display:none;">
+                <h4><i class="icon fa fa-warning"></i> Peringatan!</h4>
+                <p id='alert-text-warning'></p>
+            </div>
+            <div class="callout callout-info" id="alert_info" style="display:none;">
+                <h4><i class="icon fa fa-info"></i> Pemberitahuan!</h4>
+                <p id='alert-text-info'></p>
+            </div>
+            <div class="callout callout-danger" id="alert_danger" style="display:none;">
+                <h4><i class="icon fa fa-ban"></i> Bahaya!</h4>
+                <p id='alert-text-danger'></p>
+            </div>
+
+
+        </div>
+    </div>
+    <!-- //======================= END : ALERT AND NOTIFICATION  ================================================ -->
+
+
+
+    <div class="row">
+        <div class="col-xs-12">
+
+
+            <!-- form box -->
+            <div class="box box-primary" id="box_form_insertupdate" style="display:none;">
+                <div class="box-header with-border">
+                    <h3 class="box-title" id="nameformpanel"></h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"
+                            id="buttoncloseform_insertupdate" style="display:none"><i class="fa fa-plus"></i></button>
+                        <!-- <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button> -->
+                        <!-- <button type="button" class="btn btn-box-tool" data-widget="remove" id="buttoncloseform_insertupdate"><i class="fa fa-remove"></i></button> -->
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="row">
+                        <!-- /.col -->
+                        <div class="col-md-6">
+
+                            <div class="form-group">
+                                <label>NAMA VIEW</label>
+                                <input class="form-control isclear" type="text" id="form_main_insertupdate_namaview">
+                            </div>
+
+                            <div class="form-group">
+                                <label>NAMA KONTROLER</label>
+                                <input class="form-control isclear" type="text"
+                                    id="form_main_insertupdate_namakontroler">
+                            </div>
+
+                            <div class="form-group">
+                                <label>NAMA SP</label>
+                                <input class="form-control isclear" type="text" id="form_main_insertupdate_namasp">
+                            </div>
+
+
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-md-6">
+
+                            <div class="form-group">
+                                <label>KETERANGAN</label>
+                                <textarea class="form-control isclear" rows="5"
+                                    id="form_main_insertupdate_keterangan"></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>AKTIF</label>
+                                        <div class="col-md-12">
+                                            <label class="switch">
+                                                <input type="checkbox" checked id="form_main_insertupdate_isactivated">
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-9">
+                                    <div class="form-group">
+                                        <label>ISBOFO</label>
+                                        <select class="form-control isclear" id="form_main_insertupdate_isbofo">
+                                            <option value="BO">Back Office</option>
+                                            <option value="FO">Front Office</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.row -->
+                </div>
+                <!-- /.box-body -->
+                <div class="box-footer">
+                    *form ini digunakan untuk tambah atau edit data
+                    <div class="btn-group pull-right">
+                        <button type="button" class="btn btn-primary btn-sm" id="button_save"><i
+                                class="fa fa-fw fa-save"></i> SIMPAN</button>
+                        <button type="button" class="btn btn-default btn-sm" onclick="confirmationAction('close');"><i
+                                class="fa fa-fw fa-close"></i> TUTUP</button>
+                    </div>
+                </div>
+            </div>
+            <!-- form box -->
+
+            <!-- table box -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <!-- <h3 class="box-title">DATA OBAT</h3> -->
+                    <!-- <button type="button" onclick="openForm('insert');" class="btn btn-primary btn-sm"><i
+                            class="fa fa-fw fa-plus-square"></i> Tambah</button> -->
+                    <button type="button" onclick="selectData();" class="btn btn-primary btn-sm"><i
+                            class="fa fa-fw fa-refresh"></i> Refresh</button>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                                class="fa fa-minus"></i></button>
+                        <!-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button> -->
+                    </div>
+                </div>
+                <div class="box-header">
+                    <!-- <h3 class="box-title">Data Table With Full Features</h3> -->
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body table-responsive">
+                    <table id="example1" class="table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="numberwidth">NO</th>
+                                <th>NAMA</th>
+                                <th>STATUS</th>
+                                <th>PENDIDIKAN</th>
+                                <th>PEKERJAAN</th>
+                                <th>USIA</th>
+                                <th>NO HP</th>
+                                <th>ALAMAT</th>
+                                <th class="actionwidth">AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="GridView_DataMain"></tbody>
+                        <tfoot>
+                            <tr>
+                                <th class="numberwidth">NO</th>
+                                <th>NAMA</th>
+                                <th>STATUS</th>
+                                <th>PENDIDIKAN</th>
+                                <th>PEKERJAAN</th>
+                                <th>USIA</th>
+                                <th>NO HP</th>
+                                <th>ALAMAT</th>
+                                <th class="actionwidth">AKSI</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- table box -->
+
+
+
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+</section>
+<!-- /.content -->
+
+
+
+<!-- ============================ BEGIN : MODAL CONFIRMATION ==================================================== -->
+<div class="modal modal-default fade" id="modal_confirmation">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">KONFIRMASI</h4>
+            </div>
+            <div class="modal-body">
+                <p id="text-confirmation"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left btn-sm" id="button_aply">YA</button>
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">TIDAK</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- ============================ END : MODAL CONFIRMATION ====================================================== -->
+
+
+
+
+<!-- /.content-wrapper -->
+
+<!-- Select2 -->
+<script src="frontend/bower_components/select2/dist/js/select2.full.min.js"></script>
+
+<!-- Bootstrap 3.3.7 -->
+<script src="frontend/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="frontend/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="frontend/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="frontend/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="frontend/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="frontend/dist/js/demo.js"></script>
+<!-- page script -->
+
+<!-- kebutuhan dataTable -->
+<script src="frontend/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/dataTables.buttons.min.js"></script>
+<script src="frontend/bower_components/datatables.net-bs/js/buttons.bootstrap.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.flash.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/jszip.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/pdfmake.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/vfs_fonts.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.html5.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.print.min.js"></script>
+<script src="frontend/bower_components/datatables.net/js/buttons.colVis.min.js"></script>
+
+<script>
+
+
+    //===================================================================================================================
+    //============================= BEGIN : HALAMAN LOAD SETELAH SEMUA DOM HTML SELESAI =================================
+    //===================================================================================================================
+    $(document).ready(function () {
+        dataTablef();
+        selectData();
+
+    });
+
+
+      //===================================================================================================================
+      //============================= END : HALAMAN LOAD SETELAH SEMUA DOM HTML SELESAI ===================================
+      //===================================================================================================================
+
+
+
+
+</script>

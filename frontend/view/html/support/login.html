@@ -5,46 +5,46 @@
 
 
 
-//==================================================================================================================//
-//========================================== BEGIN : DEKLARASI VARIABLE GLOBAL =====================================//
-var NN = new NNFrameWork();
-var watermark = "NPL";
-var controller = "885910a2d735b4ba2504548ad8e58aeb";
+  //==================================================================================================================//
+  //========================================== BEGIN : DEKLARASI VARIABLE GLOBAL =====================================//
+  var NN = new NNFrameWork();
+  var watermark = "NPL";
+  var controller = "885910a2d735b4ba2504548ad8e58aeb";
 
-// DISESUIKAN DENGAN JUMLAH PARAMETER YANG AKAN DITAMPUNG PADA PARAMETER STORE PROCEDURE
-// JUMLAH MAXIMAL BERADA PADA SERVICEGATEWAY $max_param
-// AKAN TERJADI ERROR APABILA JUMLAH YANG DI ISI DISINI TIDAK SESUAI JUMLAH PENAMPUNG DI SP
-var max_param_sp = 10;
-//======================================= END : DEKLARASI VARIABLE GLOBAL ==========================================//
-//==================================================================================================================//
+  // DISESUIKAN DENGAN JUMLAH PARAMETER YANG AKAN DITAMPUNG PADA PARAMETER STORE PROCEDURE
+  // JUMLAH MAXIMAL BERADA PADA SERVICEGATEWAY $max_param
+  // AKAN TERJADI ERROR APABILA JUMLAH YANG DI ISI DISINI TIDAK SESUAI JUMLAH PENAMPUNG DI SP
+  var max_param_sp = 10;
+  //======================================= END : DEKLARASI VARIABLE GLOBAL ==========================================//
+  //==================================================================================================================//
 
 
 
-function redirectLogin(returnData){
-  if (returnData == 'good') {
+  function redirectLogin(returnData) {
+    if (returnData == 'good') {
       //redirect jika berhasil login
       window.location = "./";
-  } else {
-    $('#alert_danger').slideDown('fast').fadeTo(3000, 500).slideUp('fast', function () { $('#alert_warning').hide(); });
+    } else {
+      $('#alert_danger').slideDown('fast').fadeTo(3000, 500).slideUp('fast', function () { $('#alert_warning').hide(); });
+    }
   }
-}
 
-function enterLogin(e){
-    
-	if (e.keyCode == 13) {
-        loginDirect();
-	}
-    
-}
+  function enterLogin(e) {
 
-function loginDirect(){
-  if(validasiForm() == false){
-    return false;
+    if (e.keyCode == 13) {
+      loginDirect();
+    }
+
   }
-  // PERSIAPAN PENGIRIMAN
+
+  function loginDirect() {
+    if (validasiForm() == false) {
+      return false;
+    }
+    // PERSIAPAN PENGIRIMAN
     whattodo = "s801cda9c0408e05b4c359ae69ad22758_1";
 
-	NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
+    NN.func_kiriman(); // MEMBENTUK KEY OBJECT KIRIMAN
 
     // SETTING KIRIMAN
     kiriman[1] = document.getElementById('login_username').value;
@@ -58,30 +58,30 @@ function loginDirect(){
     // JIKA TIDAK MAKA AKAN TERJADI ERROR
     $('.btn').button('reset');
     redirectLogin(NN.backService(watermark));
-}
+  }
 
 
-function validasiForm(){
-	var isValid = true;
+  function validasiForm() {
+    var isValid = true;
 
-	if(document.getElementById('login_username').value == ""){
-		document.getElementById('login_username').style.background = NN.colorEmpty();
-		isValid = false;
-	}else{
-		document.getElementById('login_username').style.background = NN.colorDefault();
-	}
+    if (document.getElementById('login_username').value == "") {
+      document.getElementById('login_username').style.background = NN.colorEmpty();
+      isValid = false;
+    } else {
+      document.getElementById('login_username').style.background = NN.colorDefault();
+    }
 
-	if(document.getElementById('login_password').value == ""){
-		document.getElementById('login_password').style.background = NN.colorEmpty();
-		isValid = false;
-	}else{
-		document.getElementById('login_password').style.background = NN.colorDefault();
-	}
-	if(isValid == false){
-		$('#alert_warning').slideDown("fast").fadeTo(3000, 500).slideUp('fast', function () { $('#alert_warning').hide(); });
-		return isValid;
-	}
-}
+    if (document.getElementById('login_password').value == "") {
+      document.getElementById('login_password').style.background = NN.colorEmpty();
+      isValid = false;
+    } else {
+      document.getElementById('login_password').style.background = NN.colorDefault();
+    }
+    if (isValid == false) {
+      $('#alert_warning').slideDown("fast").fadeTo(3000, 500).slideUp('fast', function () { $('#alert_warning').hide(); });
+      return isValid;
+    }
+  }
 
 
 </script>
@@ -91,44 +91,46 @@ function validasiForm(){
 
 <div class="login-box">
   <div class="login-logo">
-    N2Frame
+    SYSTEM TA'ARUF
   </div>
   <!-- /.login-logo -->
   <div class="login-box-body">
     <!-- <p class="login-box-msg">Masuk untuk memulai sesi</p> -->
     <!-- //======================= BEGIN : ALERT AND NOTIFICATION =============================================== -->
-		<div class="row">
-			<div class="col-xs-12">
+    <div class="row">
+      <div class="col-xs-12">
 
 
-				<div class="callout callout-success" id="alert_success" style="display:none;">
-						<h5><i class="icon fa fa-check"></i> Berhasil!</h5>
-	          <p id='alert-text-success'>Berhasil Masuk</p>
+        <div class="callout callout-success" id="alert_success" style="display:none;">
+          <h5><i class="icon fa fa-check"></i> Berhasil!</h5>
+          <p id='alert-text-success'>Berhasil Masuk</p>
         </div>
-				<div class="callout callout-warning" id="alert_warning" style="display:none;">
-						<h5><i class="icon fa fa-warning"></i> Peringatan!</h5>
-	          <p id='alert-text-warning'>Isi Username dan Password</p>
+        <div class="callout callout-warning" id="alert_warning" style="display:none;">
+          <h5><i class="icon fa fa-warning"></i> Peringatan!</h5>
+          <p id='alert-text-warning'>Isi Username dan Password</p>
         </div>
-				<div class="callout callout-info" id="alert_info" style="display:none;">
-						<h5><i class="icon fa fa-info"></i> Pemberitahuan!</h5>
-	          <p id='alert-text-info'>belum di pakai</p>
+        <div class="callout callout-info" id="alert_info" style="display:none;">
+          <h5><i class="icon fa fa-info"></i> Pemberitahuan!</h5>
+          <p id='alert-text-info'>belum di pakai</p>
         </div>
-				<div class="callout callout-danger" id="alert_danger" style="display:none;">
-						<h5><i class="icon fa fa-ban"></i> Gagal!</h5>
-	          <p id='alert-text-danger'>Gagal Masuk, Anda belum terdaftar</p>
+        <div class="callout callout-danger" id="alert_danger" style="display:none;">
+          <h5><i class="icon fa fa-ban"></i> Gagal!</h5>
+          <p id='alert-text-danger'>Gagal Masuk, Anda belum terdaftar</p>
         </div>
 
 
-			</div>
-		</div>
-		<!-- //======================= END : ALERT AND NOTIFICATION  ================================================ -->
+      </div>
+    </div>
+    <!-- //======================= END : ALERT AND NOTIFICATION  ================================================ -->
     <form>
       <div class="form-group has-feedback">
-        <input  id="login_username" type="text" class="form-control" placeholder="USERNAME" onkeypress="enterLogin(event);">
+        <input id="login_username" type="text" class="form-control" placeholder="USERNAME"
+          onkeypress="enterLogin(event);">
         <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
       </div>
       <div class="form-group has-feedback">
-        <input id="login_password" type="password" class="form-control" placeholder="PASSWORD" onkeypress="enterLogin(event);">
+        <input id="login_password" type="password" class="form-control" placeholder="PASSWORD"
+          onkeypress="enterLogin(event);">
         <span class="glyphicon glyphicon-lock form-control-feedback"></span>
       </div>
       <div class="row">
@@ -141,7 +143,8 @@ function validasiForm(){
         </div>
         <!-- /.col -->
         <div class="col-xs-4">
-          <button type="button" onclick="loginDirect()" class="btn btn-primary btn-block btn-flat" data-loading-text="&nbsp;<i class='fa fa-circle-o-notch fa-spin'></i>">MASUK</button>
+          <button type="button" onclick="loginDirect()" class="btn btn-primary btn-block btn-flat"
+            data-loading-text="&nbsp;<i class='fa fa-circle-o-notch fa-spin'></i>">MASUK</button>
         </div>
         <!-- /.col -->
       </div>

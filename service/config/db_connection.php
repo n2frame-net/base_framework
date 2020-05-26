@@ -1,6 +1,6 @@
 <?php
 Class Connection {
-    private  $server = "mysql:host=localhost;dbname=n2frame";
+    private  $server = "mysql:host=localhost;dbname=n2frame_taaruf";
     private  $user = "root";
     private  $pass = "";
     private $options  = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,);
